@@ -1,0 +1,49 @@
+text,event_type
+"heavy rain has continued for two hours and roads are filling with water",Rainfall
+"continuous rain since morning making it hard to drive",Rainfall
+"intense rainfall expected over the next 3 hours",Rainfall
+"water accumulation caused by rain in the low lying areas",Rainfall
+"it's just drizzling a little bit right now",Rainfall
+"heavy showers passing through the city",Rainfall
+"thunder and loud noises in the sky",Thunderstorm
+"lightning struck a tree near my house",Thunderstorm
+"storm clouds gathering, looks like a huge thunderstorm",Thunderstorm
+"lightning with rain pouring heavily",Thunderstorm
+"squall lines approaching from the east",Thunderstorm
+"flooded roads everywhere I can't even walk",Flooding
+"rising water level in the nearby canal",Flooding
+"overflowing rivers destroying the crops",Flooding
+"water entering homes in our neighborhood",Flooding
+"massive inundation across the main street",Flooding
+"waist deep water in the market area",Flooding
+"extreme heat makes it impossible to go outside",Heatwave
+"unusually high temperature for this time of year",Heatwave
+"heatwave conditions prevailing across the state",Heatwave
+"severe hot weather, feels like 45 degrees",Heatwave
+"sun is scorching and temperature is unbearable",Heatwave
+"dense fog covering the highway, very dangerous",Fog
+"low visibility due to morning mist",Fog
+"thick mist making driving impossible",Fog
+"fog affecting roads and causing traffic jams",Fog
+"zero visibility outside my window",Fog
+"huge dust cloud approaching the town",Dust Storm
+"dusty winds blowing sand everywhere",Dust Storm
+"sand and dust in the air makes it hard to breathe",Dust Storm
+"massive sandstorm covering the buildings",Dust Storm
+"powerful winds blowing away rooftops",Strong Winds
+"gusty winds hitting the coast",Strong Winds
+"trees affected by wind, branches falling",Strong Winds
+"high wind speeds causing structural damage",Strong Winds
+"gale force winds uprooting old trees",Strong Winds
+"the weather is clear and sunny",Other/Unknown
+"just a normal cloudy day",Other/Unknown
+"I don't know what's happening but the sky looks weird",Other/Unknown
+"beautiful sunset tonight",Other/Unknown
+"a stray dog is running on the street",Other/Unknown
+"heavy downpour since last night",Rainfall
+"scary thunder and lightning storm",Thunderstorm
+"waterlogged streets after 15 mins of rain",Flooding
+"burning hot outside",Heatwave
+"foggy morning",Fog
+"strong gales",Strong Winds
+"dust flying everywhere",Dust Storm
