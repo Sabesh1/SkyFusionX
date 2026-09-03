@@ -13,6 +13,8 @@ class ObservationCreate(BaseModel):
     state: Optional[str] = None
     media_url: Optional[str] = None
     is_mock: bool = False
+    event_type: Optional[str] = "OTHER"
+    severity: Optional[int] = 1
 
 class ObservationResponse(ObservationCreate):
     id: str
@@ -21,6 +23,27 @@ class ObservationResponse(ObservationCreate):
     severity: Optional[int] = None
     trust_score: Optional[float] = None
     verification_status: Optional[str] = None
+    ml_event_type: Optional[str] = None
+    ml_confidence: Optional[float] = None
+    verification_recommendation: Optional[str] = None
+    model_version: Optional[str] = None
+    ml_processed_at: Optional[datetime] = None
+    
+    # Phase 5: Location Intelligence
+    resolved_city: Optional[str] = None
+    resolved_district: Optional[str] = None
+    resolved_state: Optional[str] = None
+    resolved_latitude: Optional[float] = None
+    resolved_longitude: Optional[float] = None
+    location_confidence: Optional[float] = None
+    location_method: Optional[str] = None
+    
+    # Phase 5: Duplicate Detection
+    is_duplicate: bool = False
+    duplicate_group_id: Optional[str] = None
+    duplicate_of_id: Optional[str] = None
+    duplicate_similarity: Optional[float] = None
+    duplicate_reason: Optional[str] = None
     
     class Config:
         from_attributes = True
