@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app.core.database import get_db
 from app.models.weather_event import WeatherEvent
@@ -9,8 +9,20 @@ from app.schemas.event import WeatherEventResponse
 router = APIRouter()
 
 @router.get("", response_model=List[WeatherEventResponse])
-async def list_events(db: Session = Depends(get_db)):
-    events = db.query(WeatherEvent).order_by(WeatherEvent.risk_score.desc()).limit(50).all()
+async def list_events(
+    state: Optional[str] = None,
+    event_type: Optional[str] = None,
+    verification_status: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(WeatherEvent)
+    
+    if event_type and event_type != "ALL":
+        query = query.filter(WeatherEvent.event_type == event_type)
+        
+    events = query.order_by(WeatherEvent.risk_score.desc()).limit(100).all()
     # Format for response
     result = []
     for evt in events:
