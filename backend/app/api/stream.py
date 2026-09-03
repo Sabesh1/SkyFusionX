@@ -3,8 +3,6 @@ from fastapi import APIRouter, Request
 from sse_starlette.sse import EventSourceResponse
 import json
 
-from stream.app import stream_client
-from stream import topics
 
 router = APIRouter()
 
