@@ -164,10 +164,19 @@ async def copilot_chat(request: ChatRequest, db: Session = Depends(get_db)):
         if nat["top_event"]:
             e = nat["top_event"]
             lines.append(f"• Highest priority: {e.title or e.event_type} (Risk: {e.risk_score})")
+        full_context = "\n".join(lines)
+        
+        from app.services.gemini_service import gemini_service
+        gemini_answer = await gemini_service.chat_with_context(
+            query=q,
+            context=full_context,
+            history=[{"sender": m.sender, "text": m.text} for m in request.history]
+        )
+
         return ChatResponse(
             id=f"MSG-AI-{int(datetime.datetime.now().timestamp())}",
             timestamp=timestamp,
-            text="\n".join(lines),
+            text=gemini_answer,
             sourceChips=[SourceChip(name="Application DB", type="stations")],
         )
 
@@ -260,10 +269,18 @@ async def copilot_chat(request: ChatRequest, db: Session = Depends(get_db)):
 
         response_parts.append(part)
 
-    full_text = "\n\n---\n\n".join(response_parts)
+    full_context = "\n\n---\n\n".join(response_parts)
+    
+    from app.services.gemini_service import gemini_service
+    gemini_answer = await gemini_service.chat_with_context(
+        query=q,
+        context=full_context,
+        history=[{"sender": m.sender, "text": m.text} for m in request.history]
+    )
+
     return ChatResponse(
         id=f"MSG-AI-{int(datetime.datetime.now().timestamp())}",
         timestamp=timestamp,
-        text=full_text,
+        text=gemini_answer,
         sourceChips=chips,
     )

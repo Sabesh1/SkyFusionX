@@ -1,0 +1,71 @@
+{
+    "model_version": "weather-classifier-v1",
+    "dataset_size": 48,
+    "accuracy": 0.3333333333333333,
+    "precision": 0.375,
+    "recall": 0.3333333333333333,
+    "f1_score": 0.3333333333333333,
+    "classification_report": {
+        "Dust Storm": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "Flooding": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "Fog": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Heatwave": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Other/Unknown": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Rainfall": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Strong Winds": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "Thunderstorm": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "accuracy": 0.3333333333333333,
+        "macro avg": {
+            "precision": 0.375,
+            "recall": 0.375,
+            "f1-score": 0.35416666666666663,
+            "support": 12.0
+        },
+        "weighted avg": {
+            "precision": 0.375,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 12.0
+        }
+    }
+}

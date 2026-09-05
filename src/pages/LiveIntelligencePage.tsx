@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { reportApi } from '../services/reportApi';
 import { apiClient } from '../services/apiClient';
 import { WeatherReport } from '../types/report';
@@ -17,6 +17,9 @@ import {
   User,
   ShieldCheck,
   ExternalLink,
+  Zap,
+  ZapOff,
+  RefreshCw,
 } from 'lucide-react';
 
 export const LiveIntelligencePage: React.FC = () => {
@@ -26,6 +29,9 @@ export const LiveIntelligencePage: React.FC = () => {
   const [filterState, setFilterState] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [aiStatus, setAiStatus] = useState<'Online' | 'Unavailable'>('Unavailable');
+  const [isProcessingActive, setIsProcessingActive] = useState(false);
+  const [processingCount, setProcessingCount] = useState(0);
+  const processingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { liveReports } = useDemoMode();
   const { setSelectedReport } = useApp();
 
@@ -33,7 +39,7 @@ export const LiveIntelligencePage: React.FC = () => {
     const fetchInitial = async () => {
       const data = await reportApi.getLiveReports();
       setReports(data);
-      
+
       try {
         const health = await apiClient.get<any>('/health');
         if (health && health.ml === 'loaded') {
@@ -43,11 +49,11 @@ export const LiveIntelligencePage: React.FC = () => {
         // Handle gracefully
       }
     };
-    
+
     // Only fetch initial if we are starting up (e.g. not paused initially, or we just want to fetch once)
     // Actually, let's always fetch initial on mount, just not reconnect SSE if paused.
     fetchInitial();
-    
+
     // Listen for manual submissions
     const handleSubmission = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -55,21 +61,69 @@ export const LiveIntelligencePage: React.FC = () => {
       if (id) {
         // Fetch the specific report to ensure it maps consistently with ML fields.
         reportApi.getReportById(id).then(newReport => {
-           if(newReport) {
-              setReports(current => {
-                 if (current.find(r => r.id === id)) return current;
-                 return [newReport, ...current];
-              });
-           }
+          if (newReport) {
+            setReports(current => {
+              if (current.find(r => r.id === id)) return current;
+              return [newReport, ...current];
+            });
+          }
         });
       }
     };
     window.addEventListener('report_submitted', handleSubmission);
-    
+
+    // Check for Gemini status
+    apiClient.get<any>('/health').then(health => {
+      if (health) setAiStatus('Online');
+    }).catch(() => { });
+
     return () => {
       window.removeEventListener('report_submitted', handleSubmission);
     };
-  }, []); // Run once on mount
+  }, []);
+
+  // Processing engine: auto-reprocess stuck reports periodically
+  useEffect(() => {
+    if (!isProcessingActive) {
+      if (processingIntervalRef.current) {
+        clearInterval(processingIntervalRef.current);
+        processingIntervalRef.current = null;
+      }
+      return;
+    }
+
+    const runProcessingCycle = async () => {
+      const stuckReports = reports.filter(r =>
+        r.aiStatus === 'PROCESSING' || r.status === 'PROCESSING' || !r.mlEventType
+      );
+      setProcessingCount(stuckReports.length);
+
+      // Process one per cycle to respect rate limits
+      if (stuckReports.length > 0) {
+        const target = stuckReports[0];
+        await reportApi.reprocessReport(target.id);
+        setReports(prev => prev.map(r => r.id === target.id
+          ? { ...r, aiStatus: 'PROCESSING', status: 'PROCESSING' }
+          : r
+        ));
+        // Re-fetch updated report after 8 seconds
+        setTimeout(async () => {
+          const updated = await reportApi.getReportById(target.id);
+          if (updated) {
+            setReports(prev => prev.map(r => r.id === updated.id ? updated : r));
+          }
+        }, 8000);
+      }
+    };
+
+    // Run immediately then every 15 seconds
+    runProcessingCycle();
+    processingIntervalRef.current = setInterval(runProcessingCycle, 15000);
+
+    return () => {
+      if (processingIntervalRef.current) clearInterval(processingIntervalRef.current);
+    };
+  }, [isProcessingActive, reports]);
 
   useEffect(() => {
     if (isStreamPaused) return;
@@ -83,11 +137,11 @@ export const LiveIntelligencePage: React.FC = () => {
           // Only add to stream if not already present
           setReports(prev => {
             if (prev.find(r => r.id === rawData.event_id)) return prev;
-            
+
             reportApi.getReportById(rawData.event_id).then(newReport => {
-               if(newReport) {
-                  setReports(current => [newReport, ...current]);
-               }
+              if (newReport) {
+                setReports(current => [newReport, ...current]);
+              }
             });
             return prev;
           });
@@ -106,9 +160,9 @@ export const LiveIntelligencePage: React.FC = () => {
 
   const filteredReports = allReports.filter(r => {
     const matchesState = filterState === 'ALL' || r.state.toLowerCase() === filterState.toLowerCase();
-    const matchesStatus = filterStatus === 'ALL' || 
-                         (filterStatus === 'VERIFIED' && r.status === 'VERIFIED') ||
-                         (filterStatus === 'UNVERIFIED' && r.status !== 'VERIFIED');
+    const matchesStatus = filterStatus === 'ALL' ||
+      (filterStatus === 'VERIFIED' && r.status === 'VERIFIED') ||
+      (filterStatus === 'UNVERIFIED' && r.status !== 'VERIFIED');
     const matchesSearch =
       r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.locationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,15 +179,41 @@ export const LiveIntelligencePage: React.FC = () => {
         actionButton={
           <div className="flex items-center gap-2">
             <button
+              onClick={async () => {
+                setIsProcessingActive(prev => !prev);
+                if (!isProcessingActive) {
+                  // Also trigger a fresh fetch when starting
+                  const data = await reportApi.getLiveReports();
+                  setReports(data);
+                }
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-mono font-bold transition-all ${isProcessingActive
+                ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300 animate-pulse'
+                : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-purple-500/50 hover:text-purple-300'
+                }`}
+            >
+              {isProcessingActive ? <Zap className="w-3.5 h-3.5" /> : <ZapOff className="w-3.5 h-3.5" />}
+              <span>{isProcessingActive ? `AI ENGINE RUNNING (${processingCount} queued)` : 'START AI PROCESSING'}</span>
+            </button>
+            <button
               onClick={() => setIsStreamPaused(!isStreamPaused)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-mono font-bold transition-all ${
-                isStreamPaused
-                  ? 'bg-amber-950/40 border-amber-500/40 text-amber-300'
-                  : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-mono font-bold transition-all ${isStreamPaused
+                ? 'bg-amber-950/40 border-amber-500/40 text-amber-300'
+                : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+                }`}
             >
               {isStreamPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
               <span>{isStreamPaused ? 'RESUME STREAM' : 'PAUSE STREAM'}</span>
+            </button>
+            <button
+              onClick={async () => {
+                const data = await reportApi.getLiveReports();
+                setReports(data);
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-mono font-bold bg-slate-900 border-slate-700 text-slate-400 hover:border-cyan-500/50 hover:text-cyan-300 transition-all"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>REFRESH</span>
             </button>
           </div>
         }
@@ -160,12 +240,17 @@ export const LiveIntelligencePage: React.FC = () => {
           >
             <option value="ALL">All States</option>
             <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Goa">Goa</option>
+            <option value="Assam">Assam</option>
             <option value="Telangana">Telangana</option>
             <option value="Karnataka">Karnataka</option>
             <option value="Maharashtra">Maharashtra</option>
             <option value="Delhi NCR">Delhi NCR</option>
+            <option value="More">More..</option>
           </select>
-          
+
           <select
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value)}
@@ -237,10 +322,10 @@ export const LiveIntelligencePage: React.FC = () => {
                 <span className="text-[10px] text-slate-500 block uppercase">Trust Score</span>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 pt-1">
-              <span className="px-2 py-0.5 rounded bg-purple-950/60 text-purple-400 border border-purple-500/40 text-[10px] font-mono font-bold">
-                AI EVENT: {report.mlEventType ? `${report.mlEventType} (${report.mlConfidence ? Math.round(report.mlConfidence * 100) : '--'}%)` : 'Not available'}
+              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${report.aiStatus === 'GEMINI ANALYZED' ? 'bg-purple-950/60 text-purple-400 border-purple-500/40' : report.aiStatus === 'PROCESSING' ? 'bg-amber-950/60 text-amber-400 border-amber-500/40' : report.aiStatus === 'FAILED' ? 'bg-red-950/60 text-red-400 border-red-500/40' : 'bg-slate-900/60 text-slate-400 border-slate-500/40'}`}>
+                AI EVENT: {report.aiStatus === 'PROCESSING' ? 'PROCESSING...' : (report.mlEventType ? `${report.mlEventType} (${report.mlConfidence ? Math.round(report.mlConfidence * 100) : '--'}%)` : 'Not available')}
               </span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${report.verificationRecommendation === 'HIGH_CONFIDENCE' ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/40' : report.verificationRecommendation === 'REQUIRES_HUMAN_REVIEW' ? 'bg-amber-950/60 text-amber-400 border-amber-500/40' : report.verificationRecommendation ? 'bg-red-950/60 text-red-400 border-red-500/40' : 'bg-slate-900 text-slate-500 border-slate-700'}`}>
                 AI REC: {report.verificationRecommendation || '—'}
@@ -248,35 +333,95 @@ export const LiveIntelligencePage: React.FC = () => {
             </div>
 
             <details className="group border-t border-slate-800/80 mt-2 pt-2">
-              <summary className="text-[10px] font-mono text-cyan-400 cursor-pointer list-none flex items-center gap-1 hover:text-cyan-300">
-                <span>AI ANALYSIS ▼</span>
+              <summary className="text-[10px] font-mono cursor-pointer list-none flex items-center gap-1 hover:text-cyan-300">
+                <span className={report.aiStatus === 'GEMINI ANALYZED' ? 'text-purple-400 font-bold' : 'text-cyan-400'}>
+                  {report.aiStatus === 'GEMINI ANALYZED' ? '▼ GEMINI EVIDENCE ANALYSIS' : '▼ AI ANALYSIS'}
+                </span>
+                {report.imageAnalyzed && (
+                  <span className="ml-2 px-1.5 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-500/30 text-[8px]">
+                    📸 IMAGE ANALYZED
+                  </span>
+                )}
               </summary>
-              <div className="pt-2 grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-300">
-                <div>
-                  <span className="text-slate-500 block mb-0.5">Event Classification</span>
-                  <span className="text-purple-400 font-bold">{report.mlEventType || 'Not available'}</span>
+              <div className="pt-2 grid grid-cols-2 gap-3 text-[10px] font-mono text-slate-300">
+
+                {/* Status Indicator */}
+                <div className="col-span-2 flex items-center justify-between p-2 rounded bg-slate-900/80 border border-slate-700">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-slate-500">VERIFICATION ASSESSMENT</span>
+                    <span className={`font-bold text-xs ${report.verificationAssessment === 'EVIDENCE_SUPPORTED' ? 'text-emerald-400' :
+                      report.verificationAssessment === 'EVIDENCE_CONFLICTING' ? 'text-red-400' :
+                        report.verificationAssessment === 'INSUFFICIENT_EVIDENCE' ? 'text-amber-400' :
+                          report.verificationAssessment === 'REQUIRES_HUMAN_REVIEW' ? 'text-amber-400' :
+                            'text-slate-400'
+                      }`}>
+                      {report.verificationAssessment?.replace(/_/g, ' ') || 'UNAVAILABLE'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1 text-right">
+                    <span className="text-slate-500">CONFIDENCE</span>
+                    <span className="text-slate-200 font-bold">{report.mlConfidence ? `${Math.round(report.mlConfidence * 100)}%` : '—'}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-slate-500 block mb-0.5">Model Confidence</span>
-                  <span className="text-slate-200 font-bold">{report.mlConfidence ? `${Math.round(report.mlConfidence * 100)}%` : '—'}</span>
-                </div>
-                
+
+                {/* Gemini Evidence Block */}
+                {report.geminiAnalyzed && report.geminiEvidence ? (
+                  <div className="col-span-2 space-y-3">
+                    {report.geminiEvidence.supporting?.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="text-emerald-500 font-bold">Supporting Evidence:</span>
+                        <ul className="list-none space-y-1 text-[11px] font-sans">
+                          {report.geminiEvidence.supporting.map((item, i) => (
+                            <li key={i} className="flex gap-2 text-slate-300">
+                              <span className="text-emerald-500">✓</span> {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {report.geminiEvidence.contradicting?.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="text-red-500 font-bold">Conflicting Evidence:</span>
+                        <ul className="list-none space-y-1 text-[11px] font-sans">
+                          {report.geminiEvidence.contradicting.map((item, i) => (
+                            <li key={i} className="flex gap-2 text-slate-300">
+                              <span className="text-red-500">✗</span> {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="p-2 rounded bg-slate-900 border border-slate-700/50">
+                      <span className="text-slate-500 block mb-1">Conclusion / Assessment:</span>
+                      <p className="text-slate-300 font-sans text-xs leading-relaxed">
+                        {report.geminiEvidence.assessment}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="col-span-2 p-2 rounded bg-amber-950/30 border border-amber-900/50 text-amber-500/80">
+                    ⚠ Gemini Evidence Analysis Unavailable — Used Fallback AI Heuristics
+                  </div>
+                )}
+
                 {/* Phase 5: Location Intelligence */}
-                <div>
+                <div className="border-t border-slate-800/80 pt-2 mt-1">
                   <span className="text-slate-500 block mb-0.5">Resolved Location</span>
                   <span className="text-cyan-400 font-bold">{report.resolvedCity ? `${report.resolvedCity}, ${report.resolvedState}` : '—'}</span>
                 </div>
-                <div>
+                <div className="border-t border-slate-800/80 pt-2 mt-1">
                   <span className="text-slate-500 block mb-0.5">Location Confidence</span>
                   <span className="text-slate-200 font-bold">{report.locationConfidence ? `${Math.round(report.locationConfidence * 100)}%` : '—'}</span>
                 </div>
-                
+
                 {/* Phase 5: Duplicate Detection */}
                 <div className="col-span-2 border-t border-slate-800/80 pt-2 mt-1">
                   <span className="text-slate-500 block mb-0.5">Duplicate Analysis</span>
                   {report.isDuplicate ? (
                     <span className="text-amber-400 font-bold flex items-center gap-2">
-                      ⚠️ DUPLICATE of #{report.duplicateOfId?.slice(-6) || 'Unknown'} 
+                      ⚠️ DUPLICATE of #{report.duplicateOfId?.slice(-6) || 'Unknown'}
                       <span className="text-slate-500 text-[9px]">(Similarity: {report.duplicateSimilarity ? Math.round(report.duplicateSimilarity * 100) : 0}%)</span>
                     </span>
                   ) : (
@@ -284,17 +429,9 @@ export const LiveIntelligencePage: React.FC = () => {
                   )}
                 </div>
 
-                <div>
-                  <span className="text-slate-500 block mb-0.5">Trust Score</span>
-                  <span className="text-emerald-400 font-bold">{report.trustScore ? `${report.trustScore}%` : '—'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block mb-0.5">AI Recommendation</span>
-                  <span className="text-slate-200 font-bold">{report.verificationRecommendation || '—'}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-slate-500 block mb-0.5">Model Version</span>
-                  <span className="text-slate-400">event_classifier_v1</span>
+                <div className="col-span-2 text-right">
+                  <span className="text-slate-600 block mb-0.5">Engine Version</span>
+                  <span className="text-slate-500">{report.modelVersion || 'none'}</span>
                 </div>
               </div>
             </details>
@@ -309,8 +446,7 @@ export const LiveIntelligencePage: React.FC = () => {
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
-                      // Optimistic update for realtime feel
-                      setReports(prev => prev.map(r => r.id === report.id ? {...r, status: 'VERIFIED'} : r));
+                      setReports(prev => prev.map(r => r.id === report.id ? { ...r, status: 'VERIFIED' } : r));
                       await reportApi.verifyReport(report.id);
                     }}
                     className="px-2 py-1 bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 rounded font-bold hover:bg-emerald-900"
@@ -318,6 +454,16 @@ export const LiveIntelligencePage: React.FC = () => {
                     Verify
                   </button>
                 )}
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    setReports(prev => prev.map(r => r.id === report.id ? { ...r, aiStatus: 'PROCESSING', status: 'PROCESSING' } : r));
+                    await reportApi.reprocessReport(report.id);
+                  }}
+                  className="px-2 py-1 bg-purple-950/60 text-purple-400 border border-purple-500/30 rounded font-bold hover:bg-purple-900"
+                >
+                  Force AI Sync
+                </button>
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();

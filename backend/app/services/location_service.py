@@ -125,10 +125,14 @@ def resolve_location(name: str, db: Session) -> Optional[Dict[str, Any]]:
             source="open-meteo-geocoding",
         )
         try:
-            db.add(loc)
-            db.commit()
-            db.refresh(loc)
-            logger.info(f"[Location] Cached new location: {loc_id}")
+            existing = db.query(Location).filter(Location.location_id == loc_id).first()
+            if not existing:
+                db.add(loc)
+                db.commit()
+                db.refresh(loc)
+                logger.info(f"[Location] Cached new location: {loc_id}")
+            else:
+                loc = existing
         except Exception as e:
             db.rollback()
             logger.warning(f"[Location] Could not cache location {loc_id}: {e}")

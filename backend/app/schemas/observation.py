@@ -29,6 +29,12 @@ class ObservationResponse(ObservationCreate):
     model_version: Optional[str] = None
     ml_processed_at: Optional[datetime] = None
     
+    # Gemini Evidence Analysis
+    gemini_analyzed: bool = False
+    image_analyzed: bool = False
+    verification_assessment: Optional[str] = None
+    gemini_evidence_json: Optional[str] = None  # Raw JSON string from DB
+    
     # Phase 5: Location Intelligence
     resolved_city: Optional[str] = None
     resolved_district: Optional[str] = None

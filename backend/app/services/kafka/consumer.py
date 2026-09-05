@@ -223,6 +223,26 @@ class KafkaConsumerService:
                     # Original report gets its own group ID
                     obs.duplicate_group_id = f"INC-{obs.id[-6:]}" if obs.id else None
             
+            # Phase 6: Gemini Intelligence (Only for non-duplicates to save costs)
+            if not obs.is_duplicate:
+                from app.services.gemini_service import gemini_service
+                gemini_res = await gemini_service.analyze_report(
+                    description=obs.content,
+                    city=loc_result.city,
+                    state=loc_result.state,
+                    source_type=data.get("source", "Citizen")
+                )
+                
+                if gemini_res:
+                    # Merge Gemini intelligence with existing ML outputs
+                    if gemini_res.confidence >= 0.7 or ml_confidence < 0.6:
+                         ml_event_type = gemini_res.event_type
+                         ml_confidence = gemini_res.confidence
+                         model_version = f"{model_version}+gemini" if model_version != "none" else "gemini"
+                    
+                    trust_score = gemini_res.trust_score
+                    verification_rec = gemini_res.verification_recommendation
+
             # Update Phase 5 Location fields
             obs.resolved_city = loc_result.city
             obs.resolved_district = loc_result.district

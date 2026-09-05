@@ -183,7 +183,7 @@ export const DemoModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setVerifiedCounter(prev => prev + 1);
         }
       }
-    }, 9000);
+    }, 35000);
 
     return () => clearInterval(interval);
   }, [isDemoMode]);

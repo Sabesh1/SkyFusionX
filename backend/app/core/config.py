@@ -16,7 +16,15 @@ class Settings(BaseSettings):
     WEATHER_DATA_STALE_MINUTES: int = int(os.getenv("WEATHER_DATA_STALE_MINUTES", "60"))
     WEATHER_DATA_RECENT_MINUTES: int = int(os.getenv("WEATHER_DATA_RECENT_MINUTES", "15"))
 
+    # Gemini configuration
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+    GEMINI_TIMEOUT_SECONDS: int = int(os.getenv("GEMINI_TIMEOUT_SECONDS", "60"))
+    GEMINI_MAX_REPORT_CHARS: int = int(os.getenv("GEMINI_MAX_REPORT_CHARS", "2000"))
+    GEMINI_MAX_RETRIES: int = int(os.getenv("GEMINI_MAX_RETRIES", "4"))
+
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 settings = Settings()

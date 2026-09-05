@@ -35,8 +35,8 @@ export const reportApi = {
         event: br.event_type || 'Unknown Event',
         source: br.source || 'Citizen App',
         sourceHandle: `@user_${br.source_event_id || '123'}`,
-        sourceReputation: Math.round(br.trust_score || 50),
-        trustScore: Math.round(br.trust_score || 50),
+        sourceReputation: Math.round(br.trust_score ?? 50),
+        trustScore: Math.round(br.trust_score ?? 50),
         status: br.verification_status || 'UNDER_REVIEW',
         severity: typeof br.severity === 'number' 
           ? (br.severity >= 4 ? 'CRITICAL' : br.severity === 3 ? 'HIGH' : 'MODERATE') 
@@ -53,6 +53,15 @@ export const reportApi = {
           satelliteCorrelation: 80,
         },
         aiExplanation: `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
+        aiStatus: (() => {
+          if (br.verification_status === 'PROCESSING') return 'PROCESSING';
+          if (br.gemini_analyzed === true) return 'GEMINI ANALYZED';
+          if (br.model_version?.includes('gemini')) return 'GEMINI ANALYZED';
+          if (br.model_version === 'v1' || br.model_version?.includes('v1')) return 'ML ANALYZED';
+          if (br.model_version === 'fallback' || br.model_version === 'none') return 'FALLBACK';
+          return 'PROCESSING';
+        })(),
+        modelVersion: br.model_version,
         mlEventType: br.ml_event_type,
         mlConfidence: br.ml_confidence,
         verificationRecommendation: br.verification_recommendation,
@@ -60,15 +69,20 @@ export const reportApi = {
         matchedStationDistanceKm: 5.0,
         matchedStationRainfallMm: 0.0,
         duplicateCount: 0,
-        
         resolvedCity: br.resolved_city,
         resolvedState: br.resolved_state,
         locationConfidence: br.location_confidence,
-        
         isDuplicate: br.is_duplicate,
         duplicateGroupId: br.duplicate_group_id,
         duplicateSimilarity: br.duplicate_similarity,
-        duplicateOfId: br.duplicate_of_id
+        duplicateOfId: br.duplicate_of_id,
+        geminiAnalyzed: br.gemini_analyzed || false,
+        imageAnalyzed: br.image_analyzed || false,
+        verificationAssessment: br.verification_assessment,
+        geminiEvidence: (() => {
+          if (!br.gemini_evidence_json) return null;
+          try { return JSON.parse(br.gemini_evidence_json); } catch { return null; }
+        })()
       }));
       
       if (filter?.search) {
@@ -100,8 +114,8 @@ export const reportApi = {
         event: br.event_type || 'Unknown Event',
         source: br.source || 'Citizen App',
         sourceHandle: `@user_${br.source_event_id || '123'}`,
-        sourceReputation: Math.round(br.trust_score || 50),
-        trustScore: Math.round(br.trust_score || 50),
+        sourceReputation: Math.round(br.trust_score ?? 50),
+        trustScore: Math.round(br.trust_score ?? 50),
         status: br.verification_status || 'UNDER_REVIEW',
         severity: typeof br.severity === 'number' 
           ? (br.severity >= 4 ? 'CRITICAL' : br.severity === 3 ? 'HIGH' : 'MODERATE') 
@@ -118,6 +132,8 @@ export const reportApi = {
           satelliteCorrelation: 80,
         },
         aiExplanation: `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
+        aiStatus: br.verification_status === 'PROCESSING' ? 'PROCESSING' : (br.model_version?.includes('gemini') ? 'GEMINI ANALYZED' : (br.model_version === 'v1' ? 'FALLBACK' : 'FAILED')),
+        modelVersion: br.model_version,
         mlEventType: br.ml_event_type,
         mlConfidence: br.ml_confidence,
         verificationRecommendation: br.verification_recommendation,
@@ -149,6 +165,7 @@ export const reportApi = {
     state?: string;
     event_type?: string;
     severity?: number;
+    media_url?: string;
   }): Promise<{ status: string; observation_id: string } | null> {
     const res = await apiClient.post<{ status: string; observation_id: string }>(
       '/api/v1/observations',
@@ -163,6 +180,7 @@ export const reportApi = {
         state: reportData.state || 'Unknown',
         event_type: reportData.event_type || 'OTHER',
         severity: reportData.severity || 1,
+        media_url: reportData.media_url,
         is_mock: false,
       }
     );
@@ -177,6 +195,11 @@ export const reportApi = {
       return this.getReportById(id);
     }
     return null;
+  },
+
+  async reprocessReport(id: string): Promise<{ status: string; observation_id: string } | null> {
+    const res = await apiClient.post<{ status: string; observation_id: string }>(`/api/v1/observations/${id}/reprocess`, {});
+    return res;
   },
 
   async deleteReport(id: string): Promise<boolean> {

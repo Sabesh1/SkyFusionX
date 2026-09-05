@@ -41,6 +41,8 @@ export interface WeatherReport {
   evidence?: WeatherEvidence[];
   verificationFactors: VerificationFactors;
   aiExplanation: string;
+  aiStatus?: string;
+  modelVersion?: string;
   mlEventType?: string;
   mlConfidence?: number;
   verificationRecommendation?: string;
@@ -60,4 +62,17 @@ export interface WeatherReport {
   duplicateGroupId?: string;
   duplicateSimilarity?: number;
   duplicateOfId?: string;
+
+  // Gemini Evidence Analysis
+  geminiAnalyzed?: boolean;           // true only if Gemini actually ran
+  imageAnalyzed?: boolean;            // true only if image was multimodally analyzed
+  verificationAssessment?: string;    // EVIDENCE_SUPPORTED | EVIDENCE_CONFLICTING | INSUFFICIENT_EVIDENCE | REQUIRES_HUMAN_REVIEW
+  geminiEvidence?: {
+    supporting: string[];
+    contradicting: string[];
+    assessment: string;
+    reason: string;
+    verification_status: string;
+    image_analyzed: boolean;
+  } | null;
 }

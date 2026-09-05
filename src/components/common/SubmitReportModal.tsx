@@ -40,6 +40,7 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
   const [locationName, setLocationName] = useState('');
   const [eventType, setEventType] = useState<WeatherEventType>('Urban Flooding');
   const [severity, setSeverity] = useState<SeverityLevel>('HIGH');
+  const [mediaUrl, setMediaUrl] = useState<string>('');
 
   // Multi-step verification animation state
   const [isVerifying, setIsVerifying] = useState(false);
@@ -108,7 +109,8 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
         city: locCity,
         state: state,
         event_type: eventType,
-        severity: sevMap[severity]
+        severity: sevMap[severity],
+        media_url: mediaUrl || undefined
       });
 
       if (res && res.observation_id) {
@@ -144,6 +146,7 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
     setVerifyStep(0);
     setTitle('');
     setDescription('');
+    setMediaUrl('');
     onClose();
   };
 
@@ -271,6 +274,45 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
                   placeholder="Describe ground observations (e.g. Water level rising above 3ft, cars stranded, continuous thunder)..."
                   className="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-800 focus:border-cyan-500 text-xs text-slate-200 outline-none font-sans"
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-mono text-slate-400">
+                  Optional: Attach Photo Evidence
+                </label>
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer flex items-center justify-center w-full max-w-[200px] px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500 text-xs text-slate-300 font-mono transition-colors">
+                    <Camera className="w-4 h-4 mr-2" />
+                    <span>Select Image</span>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      className="hidden" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setMediaUrl(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  {mediaUrl && (
+                    <div className="relative">
+                      <img src={mediaUrl} alt="Evidence" className="h-10 w-10 object-cover rounded border border-slate-700" />
+                      <button 
+                        type="button" 
+                        onClick={() => setMediaUrl('')}
+                        className="absolute -top-2 -right-2 bg-red-500 rounded-full text-white p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="pt-3 border-t border-slate-800 flex items-center justify-between">

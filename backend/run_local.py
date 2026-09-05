@@ -1,6 +1,10 @@
 import uvicorn
 import os
 import sys
+from dotenv import load_dotenv
+
+# Load .env from the same directory as this script
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 if __name__ == "__main__":
     # Ensure current backend directory is in python path
