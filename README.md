@@ -1,272 +1,192 @@
 # SkyFusionX 🌦️
 
-**Advanced fusion of weather data from heterogeneous sources**
+**SIH26069 — National Weather Big Data Analytics Platform**
 
-SkyFusionX is a cutting-edge AI-powered weather truth engine that aggregates, validates, and fuses weather data from multiple sources to provide the most accurate and reliable weather insights possible.
+SkyFusionX is a full-stack, AI-powered weather truth engine built to aggregate, validate, and fuse weather data from multiple heterogeneous sources. Designed for the SIH26069 problem statement, it processes real-world weather data and citizen reports to provide a unified, highly confident "weather truth".
 
-## 🚀 Overview
+---
 
-**Problem:** Weather data from different sources (satellites, ground stations, weather models, user reports) often has gaps, inconsistencies, or varying levels of accuracy.
+## 🎯 Problem Statement (SIH26069)
+Weather data collected from disparate sources (satellites, radar, citizen reports, IoT devices) often contains inconsistencies, gaps, and fake or erroneous reports. The challenge is to build a robust big data analytics platform that can ingest this massive volume of data, intelligently identify and filter out fake evidence, and fuse the remaining accurate data into actionable intelligence.
 
-**Solution:** SkyFusionX uses advanced AI techniques—including multi-modal fusion, anomaly detection, and neural-symbolic reasoning—to combine these disparate data streams into a unified, trustworthy weather truth.
+## 💡 Our Solution
+SkyFusionX solves this by passing all ingested data through a **10-Stage Intelligence Pipeline** powered by Kafka stream processing and a custom **Truth Engine**. Citizen reports and sensor data are cross-referenced against real-time Open-Meteo forecasts, historical patterns, and geospatial clustering. Verified reports are then grouped into significant "Weather Events", assigned a risk score, and presented on a dynamic React dashboard for command center monitoring.
+
+---
 
 ## 🌟 Key Features
 
-- **Multi-Source Fusion:** Seamlessly integrates data from:
-  - ✅ Meteorological services (NOAA, Met Office, etc.)
-  - ✅ Satellite imagery (NASA, ESA)
-  - ✅ Radar networks
-  - ✅ IoT weather stations
-  - ✅ User-submitted reports
+- **10-Stage Stream Processing Pipeline:** Data moves asynchronously through 10 Kafka topics: `RAW` ➔ `CLEANED` ➔ `VERIFIED` ➔ `CLASSIFIED` ➔ `CLUSTERED` ➔ `PREDICTED` ➔ `RISK` ➔ `ALERTS`.
+- **Truth Engine (Evidence Verification):** Validates every incoming report against 7 parameters (Source Reliability, Location Plausibility, Temporal Consistency, Weather Agreement, Nearby Corroboration, Media Quality, Historical Match) to assign a deterministic `Trust Score` (0-100).
+- **Real-World Weather Ingestion:** Continuous background polling of the Open-Meteo API to ground citizen reports against actual meteorological data.
+- **Event Clustering & Fusion:** Groups temporally and geographically related reports into unified Weather Events using HDBSCAN clustering concepts.
+- **AI Copilot (RAG):** A Gemini-powered, location-aware chat assistant that grounds responses in the live Open-Meteo forecasts and our internal application database.
+- **Interactive Command Center:** A premium React dashboard featuring live Leaflet maps, 3D globes (Three.js), and deep analytics (Recharts) for real-time monitoring.
 
-- **AI-Powered Validation:**
-  - 🔍 **Anomaly Detection:** Identifies sensor malfunctions or erroneous reports
-  - 🤖 **Neural Consistency Checks:** Uses machine learning models to validate observations
-  - ⚖️ **Source Trust Scoring:** Automatically weights data based on source reliability
+---
 
-- **Temporal Interpolation:** Intelligent gap-filling using time-series analysis
-
-- **Spatial Analysis:** Creates unified weather grids with high spatial resolution
-
-- **Real-time Streaming:** Kafka-based event-driven architecture for low-latency updates
-
-##  architectural
+## ⚙️ Complete System Architecture
 
 ```mermaid
 graph TD
     subgraph Data Sources
-        A[Weather APIs] --> F
-        B[Satellite Data] --> F
-        C[Radar Feeds] --> F
-        D[User Reports] --> F
-        E[IoT Sensors] --> F
+        API[Open-Meteo API]
+        CITIZEN[Citizen Reports]
+        IOT[IoT Sensors]
     end
 
-    subgraph Backend
-        F[Data Ingestion] --> G[Normalization & Cleaning]
-        G --> H[Anomaly Detection]
-        H --> I[Fusion Engine]
-        I --> J[Validation Layer]
-        J --> K[Unified Weather Truth]
-        
-        K --> L[Prediction Models]
-        L --> M[Alerting System]
+    subgraph Kafka Stream Processing Pipeline
+        RAW[Raw Data] --> CLEAN[Cleaned]
+        CLEAN --> TRUTH[Truth Engine Verification]
+        TRUTH --> CLASS[Classification]
+        CLASS --> CLUST[Event Clustering & Fusion]
+        CLUST --> PRED[Prediction]
+        PRED --> RISK[Risk Assessment]
+        RISK --> ALERT[Alert Generation]
     end
 
-    K --> N[Frontend Dashboard]
-    K --> O[External APIs]
-    K --> P[Storage]
+    subgraph Backend Core
+        FASTAPI[FastAPI Server]
+        DB[(SQLite / PostgreSQL)]
+        COPILOT[Gemini AI Copilot]
+    end
+
+    subgraph Frontend Command Center
+        REACT[React + Vite Dashboard]
+        MAP[Leaflet Maps]
+        GLOBE[Three.js Globe]
+    end
+
+    API --> FASTAPI
+    CITIZEN --> RAW
+    IOT --> RAW
+    
+    ALERT --> FASTAPI
+    FASTAPI <--> DB
+    FASTAPI <--> COPILOT
+    
+    FASTAPI -->|REST / SSE| REACT
+    REACT --> MAP
+    REACT --> GLOBE
 ```
 
-### Key Components
+---
 
-- **Data Ingestion:** Collects data from multiple APIs and sources
-- **Normalization:** Standardizes data formats and units
-- **Anomaly Detection:** Identifies outliers and sensor errors
-- **Fusion Engine:** Multi-modal AI fusion with trust scoring
-- **Validation Layer:** Neural-symbolic consistency checks
-- **Unified Weather Truth:** The final, trusted weather state
+## 🛠️ Technology Stack
 
-## 🛠️ Getting Started
+**Frontend & UI:**
+- React 18, Vite, TypeScript
+- Tailwind CSS (Styling)
+- React-Router-DOM (Navigation)
+- React-Leaflet (Interactive 2D Maps)
+- React-Three-Fiber / Three.js (3D Globe)
+- Recharts (Analytics and Visualizations)
+
+**Backend & APIs:**
+- FastAPI & Uvicorn (REST APIs & SSE Streams)
+- Python 3.9+
+- SQLAlchemy (ORM) & Pydantic (Data Validation)
+
+**Database & Storage:**
+- SQLite (Configured for local development)
+- PostgreSQL (Supported for production via SQLAlchemy)
+
+**Stream Processing & AI:**
+- Kafka (`aiokafka` for event streaming)
+- Scikit-learn, HDBSCAN (Clustering & ML)
+- Google GenAI (Gemini 3.5 Flash/Lite) for AI Copilot and Image Verification fallback.
+
+---
+
+## 📂 Project Structure
+
+```text
+SkyFusionX/
+├── backend/
+│   ├── app/
+│   │   ├── api/          # FastAPI Routes (auth, dashboard, copilot, etc.)
+│   │   ├── core/         # DB connection, Config (.env)
+│   │   ├── intelligence/ # TruthEngine, Classifier, FusionEngine, RiskEngine
+│   │   ├── models/       # SQLAlchemy Database Models
+│   │   └── services/     # Weather ingestion, Gemini integration, Schedulers
+│   ├── stream/           # Kafka stream processors and consumers
+│   ├── run_local.py      # Entry point for local backend server
+│   └── requirements.txt  # Python dependencies
+├── src/                  # React Frontend Code
+│   ├── components/       # Reusable UI, Layout, Maps, Charts
+│   ├── context/          # React Context (App state, Demo modes)
+│   ├── pages/            # 15+ Dashboard views (Live Intel, Truth Engine, etc.)
+│   └── services/         # Frontend API clients
+├── package.json          # Node dependencies
+└── vite.config.ts        # Vite configuration
+```
+
+---
+
+## 🚀 Installation & Setup
 
 ### Prerequisites
-
+- Node.js 18+
 - Python 3.9+
-- Node.js 16+
-- PostgreSQL 13+
-- Kafka 3.0+
+- Apache Kafka 3.0+ (Required for the stream processing pipeline)
 
-### Installation
+### 1. Environment Variables
+Create a `.env` file in the `backend/` directory:
 
-#### 1. Clone the repository
-
-```bash
-git clone <repository-url>
-cd SkyFusionX
+```env
+DATABASE_URL=sqlite:///./weather_truth.db
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+GEMINI_API_KEY=your_gemini_api_key_here
+WEATHER_REFRESH_INTERVAL_MINUTES=15
 ```
 
-#### 2. Backend Setup
-
+### 2. Backend Setup
 ```bash
 cd backend
 python -m venv venv
+
+# Activate virtual environment
+# Windows:
 venv\Scripts\activate
+# Unix/MacOS:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the local backend server (starts FastAPI, Kafka Consumers, and background scheduler)
+python run_local.py
 ```
+*The backend will be available at `http://localhost:8000`.*
 
-Configure your PostgreSQL connection in `backend/.env`:
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=skyfusionx
-DB_USER=your_user
-DB_PASSWORD=your_password
-```
-
-Run database migrations:
-
+### 3. Frontend Setup
 ```bash
-./venv/Scripts/python manage.py db upgrade
-```
-
-Start the backend:
-
-```bash
-./venv/Scripts/python manage.py run_local.py
-```
-
-Backend will be available at `http://localhost:8000`
-
-#### 3. Frontend Setup
-
-```bash
-cd frontend
+# From the root directory
 npm install
-npm start
-```
-
-Frontend will be available at `http://localhost:3000`
-
-## 📊 Data Flow
-
-```mermaid
-sequenceDiagram
-    participant Source as Data Source
-    participant Ingest as Ingestion Service
-    participant Fusion as Fusion Engine
-    participant DB as Database
-    participant UI as Frontend UI
-
-    Source->>Ingest: New Weather Data (API, Satellite, etc.)
-    Ingest->>Ingest: Normalize & Validate
-    Ingest->>Fusion: Send to Fusion Engine
-    Fusion->>Fusion: Cross-reference with other sources
-    Fusion->>Fusion: AI Model Validation
-    Fusion->>DB: Store Unified Weather Truth
-    DB-->>Fusion: Acknowledgment
-    Fusion-->>UI: Weather Data Update
-    UI->>UI: Render on Map & Dashboards
-```
-
-## 🎓 AI Techniques Used
-
-- **Multi-modal Fusion:** Combining different data modalities (tabular, image, time-series)
-- **Neural Consistency Checking:** Validating data using neural networks
-- **Anomaly Detection:** Isolation Forest and autoencoders for outlier detection
-- **Time-Series Interpolation:** LSTM and Prophet for gap filling
-- **Trust Scoring:** Dynamic source reliability calculation
-- **Neural-Symbolic Reasoning:** Combining deep learning with logical rules
-
-## 🧩 Architecture Options
-
-### Local Development
-
-```bash
-# Start backend
-cd backend
-.\venv\Scripts\python.exe .\run_local.py
-
-# Start frontend
 npm run dev
 ```
+*The frontend command center will be available at `http://localhost:5173`.*
 
-### Production Deployment
+---
 
-```bash
-# Backend (Docker)
-docker-compose up -d
+## 📊 Current Implementation Status & Limitations
 
-# Frontend (Nginx)
-docker build -t frontend .
-docker run -d -p 80:80 --name frontend frontend
-```
+**What is actually implemented:**
+- The **10-stage Kafka stream processing pipeline** is fully functional in `backend/stream/processor.py`.
+- The **Truth Engine** is implemented and actively scores incoming observations against rules and live data.
+- **Live Weather Ingestion:** The background scheduler actively polls Open-Meteo based on geographical data.
+- **RAG Copilot:** Fully integrated with Gemini, providing context-aware answers based on the local SQLite database and Open-Meteo API.
+- **React Dashboard:** 15+ complex views including Truth Engine diagnostics, Clustering maps, Risk Heatmaps, and timeline analytics.
 
-## 🧪 Testing
+**Limitations (Prototype constraints):**
+- **Local DB:** Currently defaults to SQLite for ease of hackathon setup, though PostgreSQL is supported via SQLAlchemy.
+- **Deterministic Clustering:** Geospatial clustering relies on deterministic coordinate rounding in the local environment instead of deep HDBSCAN models to avoid heavy local computation.
+- **External LLM Dependency:** Uses Gemini API for NLP and image verification. In a strictly isolated national deployment, this would need to be replaced with a local open-source LLM.
 
-### Backend Tests
+---
 
-```bash
-.\venv\Scripts\python.exe -m pytest tests/
-```
+## 🔮 Future Improvements
 
-### Frontend Tests
-
-```bash
-npm test
-```
-
-## 📈 Architecture Diagram
-
-```mermaid
-flowchart TB
-    subgraph External Systems
-        API[Weather APIs]
-        SAT[Satellite Data]
-        RADAR[Radar Feeds]
-        USERS[User Reports]
-        SENSORS[IoT Sensors]
-    end
-
-    subgraph SkyFusionX Backend
-        subgraph Data Ingestion
-            INGEST[Ingestion Service]
-        end
-
-        subgraph AI Core
-            NORM[Data Normalization]
-            ANOMALY[Anomaly Detection]
-            FUSION[Fusion Engine]
-            VALIDATE[Validation Layer]
-        end
-
-        subgraph Data Layer
-            DB[(PostgreSQL Database)]
-            CACHE[(Redis Cache)]
-            KAFKA[Kafka Event Bus]
-        end
-
-        subgraph Prediction & Alerting
-            PREDICT[Prediction Models]
-            ALERT[Alerting System]
-        end
-    end
-
-    subgraph Frontend
-        DASH[Dashboard UI]
-        MAP[Interactive Map]
-        REPORTS[Report Submission]
-    end
-
-    API --> INGEST
-    SAT --> INGEST
-    RADAR --> INGEST
-    USERS --> INGEST
-    SENSORS --> INGEST
-
-    INGEST --> NORM
-    NORM --> ANOMALY
-    ANOMALY --> FUSION
-    FUSION --> VALIDATE
-    VALIDATE --> DB
-    VALIDATE --> KAFKA
-
-    KAFKA --> PREDICT
-    KAFKA --> ALERT
-
-    DB --> CACHE
-    CACHE --> DASH
-    CACHE --> MAP
-
-    DASH --> DB
-    MAP --> DB
-    REPORTS --> USERS
-
-    style External Systems fill:#f9f,stroke:#333,stroke-width:2px
-    style SkyFusionX Backend fill:#bbf,stroke:#333,stroke-width:2px
-    style Frontend fill:#cfc,stroke:#333,stroke-width:2px
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+1. **Distributed Database Migration:** Move from SQLite to a distributed PostgreSQL or Cassandra cluster for national-scale read/write throughput.
+2. **Direct Satellite Integration:** Tap directly into INSAT raw satellite feeds instead of relying exclusively on external meteorological APIs.
+3. **Local LLM Deployment:** Replace the Gemini API dependency with a locally hosted LLaMA or Mistral model for air-gapped security compliance.
