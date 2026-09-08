@@ -1,12 +1,12 @@
 import asyncio
 import logging
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 
 from stream.app import stream_client
 from stream import topics
-from app.intelligence.truth_engine import TruthEngine
+from app.intelligence.truth_engine import TruthEngine, TruthEvidence
 from app.intelligence.classifier import Classifier
 from app.intelligence.fusion_engine import FusionEngine
 from app.intelligence.clustering_engine import ClusteringEngine
@@ -21,8 +21,35 @@ from app.api.stream import push_to_clients
 
 logger = logging.getLogger(__name__)
 
-# In-memory store of recent observations for clustering prototype
-recent_observations: List[Dict[str, Any]] = []
+
+async def get_recent_observations(db, minutes: int = 30) -> List[Dict[str, Any]]:
+    """Fetch recent verified observations from database instead of memory."""
+    cutoff = datetime.utcnow() - timedelta(minutes=minutes)
+    result = db.query(Observation).filter(
+        Observation.observed_at > cutoff,
+        Observation.verification_status.in_(["HIGH_CONFIDENCE", "MEDIUM_HIGH_CONFIDENCE"])
+    ).order_by(Observation.observed_at.desc()).all()
+
+    return [
+        {
+            "observation_id": obs.id,
+            "source": obs.source,
+            "source_event_id": obs.source_event_id,
+            "occurred_at": obs.observed_at.isoformat(),
+            "content": obs.content,
+            "latitude": obs.latitude,
+            "longitude": obs.longitude,
+            "city": obs.city,
+            "state": obs.state,
+            "event_type": obs.event_type,
+            "severity": obs.severity,
+            "trust_score": obs.trust_score,
+            "verification_status": obs.verification_status,
+            "is_mock": obs.is_mock,
+        }
+        for obs in result
+    ]
+
 
 async def process_raw(msg: Dict[str, Any]):
     """ Stage 2: CLEAN """
@@ -39,14 +66,23 @@ async def process_raw(msg: Dict[str, Any]):
 
 async def process_cleaned(msg: Dict[str, Any]):
     """ Stage 3: VERIFY (Truth Engine) """
-    context = {"weather_agreement": 75, "nearby_corroboration": 50}
-    truth_result = TruthEngine.evaluate(msg, context)
-    
+    evidence = TruthEvidence(
+        source=msg.get("source_reliability", 50),
+        location=msg.get("location_plausibility", 50),
+        timestamp=msg.get("temporal_consistency", 50),
+        weather_data=msg.get("weather_agreement", 50),
+        nearby_reports=msg.get("nearby_corroboration", 50),
+        media=msg.get("media_quality", 50),
+        historical=msg.get("historical_pattern_match", 50),
+    )
+    truth_result = TruthEngine().calculate(evidence)
+
     verified = msg.copy()
-    verified['trust_score'] = truth_result['trust_score']
-    verified['verification_status'] = truth_result['status']
-    verified['truth_analysis'] = truth_result['evidence']
-    
+    verified['trust_score'] = truth_result.overall
+    verified['verification_status'] = truth_result.status
+    verified['truth_analysis'] = dict(truth_result.factors)
+    verified['requires_human_review'] = truth_result.requires_human_review
+
     await stream_client.send(topics.TOPIC_VERIFIED, verified)
 
 async def process_verified(msg: Dict[str, Any]):
@@ -89,35 +125,37 @@ async def process_verified(msg: Dict[str, Any]):
         db.close()
         
     await stream_client.send(topics.TOPIC_CLASSIFIED, classified)
-    
-    # To drive the prototype, we trigger the next stages directly by adding to our memory store
-    recent_observations.append(classified)
-    
-    # We will trigger the cluster/fuse stage every time we get a classified message
-    # For a real system, this would be a scheduled batch job over PostGIS data
+
+    # Trigger clustering from database (replaces in-memory array)
     await trigger_clustering()
 
 async def trigger_clustering():
     """ Stage 5 & 6: FUSE & CLUSTER """
-    if not recent_observations:
+    db = SessionLocal()
+    try:
+        recent_obs = await get_recent_observations(db, minutes=30)
+    finally:
+        db.close()
+
+    if not recent_obs:
         return
-        
+
     # Cluster observations
-    events = ClusteringEngine.cluster(recent_observations)
-    
+    events = ClusteringEngine.cluster(recent_obs)
+
     for event in events:
         # Fuse observations in this cluster
         fusion_result = FusionEngine.fuse(event["observations"])
-        
+
         event.update(fusion_result)
-        
+
         # We need an event ID that is stable for the same geographic area
         # For prototype, we generate one deterministically based on cluster lat/lon roughly
         lat_r = round(event["latitude"], 2)
         lon_r = round(event["longitude"], 2)
         event_id = f"EVT-{abs(hash(f'{event['event_type']}_{lat_r}_{lon_r}')) % 100000}"
         event["event_id"] = event_id
-        
+
         await stream_client.send(topics.TOPIC_CLUSTERED, event)
 
 async def process_clustered(msg: Dict[str, Any]):

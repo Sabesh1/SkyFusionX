@@ -1,4 +1,5 @@
 import { AssistantMessage, AssistantSourceChip } from '../types/assistant';
+import { apiClient } from './apiClient';
 
 /**
  * AI Copilot Frontend Service
@@ -32,17 +33,12 @@ export const assistantApi = {
     const validTime = safeTime(new Date().toISOString()); // never "Invalid Date"
 
     try {
-      const res = await fetch('/api/v1/copilot/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query,
-          history: history.map(m => ({ sender: m.sender, text: m.text, timestamp: m.timestamp })),
-        }),
+      const data = await apiClient.post<BackendChatResponse>('/api/v1/copilot/chat', {
+        query,
+        history: history.map(m => ({ sender: m.sender, text: m.text, timestamp: m.timestamp })),
       });
 
-      if (res.ok) {
-        const data: BackendChatResponse = await res.json();
+      if (data) {
         return {
           id: data.id || `MSG-AI-${Date.now()}`,
           sender: 'assistant',

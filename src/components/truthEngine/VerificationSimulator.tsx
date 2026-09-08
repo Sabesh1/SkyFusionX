@@ -59,21 +59,21 @@ export const VerificationSimulator: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-b from-[#1C1C24] to-[#121217] border border-[#2B2B3C] space-y-6 shadow-card-emboss">
+    <div className="p-6 md:p-8 rounded-3xl bg-theme-card border border-theme-border/80 space-y-6 shadow-card-emboss">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#252534] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme-border/80 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full bg-[#2A2016] text-[#E5A962] border border-[#E5A962]/40 text-[10px] font-mono font-bold uppercase">
               Interactive Lab
             </span>
-            <span className="font-mono text-xs text-slate-400">Bayesian Real-Time Simulator</span>
+            <span className="font-mono text-xs text-theme-muted">Bayesian Real-Time Simulator</span>
           </div>
           <h3 className="text-lg font-bold font-display text-[#EEEEF2] mt-1 flex items-center gap-2">
             <Cpu className="w-5 h-5 text-[#E5A962]" />
             AI Truth Verification Simulation Sandbox
           </h3>
-          <p className="text-xs text-slate-400 font-sans mt-0.5">
+          <p className="text-xs text-theme-muted font-sans mt-0.5">
             Adjust the 7 factor weight sliders to dynamically calculate the Bayesian verification score.
           </p>
         </div>
@@ -109,7 +109,7 @@ export const VerificationSimulator: React.FC = () => {
             <span className="text-xs font-mono uppercase font-bold text-[#E5A962]">
               Adjust 7 Bayesian Input Weights:
             </span>
-            <span className="text-[10px] font-mono text-slate-400">Interactive Controls</span>
+            <span className="text-[10px] font-mono text-theme-muted">Interactive Controls</span>
           </div>
 
           <FactorBreakdown
@@ -120,7 +120,7 @@ export const VerificationSimulator: React.FC = () => {
         </div>
 
         {/* Right 5 Cols: Live Calculated Gauge & Verdict */}
-        <div className="lg:col-span-5 p-6 rounded-2xl bg-[#16161E] border border-[#2B2B3C] shadow-card-inset flex flex-col items-center justify-center text-center space-y-4">
+        <div className="lg:col-span-5 p-6 rounded-2xl bg-theme-surface border border-theme-border/80 shadow-card-inset flex flex-col items-center justify-center text-center space-y-4">
           <TrustScoreGauge
             score={calculation.trustScore}
             size="xl"
@@ -128,7 +128,7 @@ export const VerificationSimulator: React.FC = () => {
             subtext="Real-time Bayesian Convergence"
           />
 
-          <div className="w-full p-4 rounded-xl bg-[#1A1A24] border border-[#272736] text-xs font-sans text-slate-300 leading-relaxed text-left">
+          <div className="w-full p-4 rounded-xl bg-theme-bg border border-theme-border/80 text-xs font-sans text-theme-text leading-relaxed text-left">
             <span className="font-mono text-[#E5A962] font-bold uppercase block mb-1">
               AI Verification Verdict:
             </span>
@@ -139,11 +139,11 @@ export const VerificationSimulator: React.FC = () => {
               : 'Low convergence (<70%). Quarantined to prevent disinformation spread.'}
           </div>
 
-          <div className="w-full grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-400">
-            <div className="p-2 rounded-lg bg-[#20202C] border border-[#2A2A3A]">
+          <div className="w-full grid grid-cols-2 gap-2 text-[10px] font-mono text-theme-muted">
+            <div className="p-2 rounded-lg bg-theme-bg border border-theme-border/80">
               Confidence: <strong className="text-[#E5A962]">{calculation.confidenceLevel}</strong>
             </div>
-            <div className="p-2 rounded-lg bg-[#20202C] border border-[#2A2A3A]">
+            <div className="p-2 rounded-lg bg-theme-bg border border-theme-border/80">
               Compute Latency: <strong className="text-emerald-400">18ms</strong>
             </div>
           </div>

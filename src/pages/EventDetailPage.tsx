@@ -85,52 +85,52 @@ export const EventDetailPage: React.FC = () => {
       </div>
 
       {/* Hero Overview Card */}
-      <div className="p-6 rounded-2xl bg-command-card border border-cyan-500/40 shadow-2xl space-y-6">
+      <div className="p-6 rounded-2xl bg-theme-card border border-cyan-500/40 shadow-2xl space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           {/* Left 8 Cols: Incident Summary & Action Directive */}
           <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center gap-3">
               <SeverityBadge severity={event.severity} size="md" />
-              <span className="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-xs font-mono text-cyan-300 font-bold">
+              <span className="px-2.5 py-1 rounded bg-theme-surface border border-theme-border text-xs font-mono text-cyan-300 font-bold">
                 {event.status} STATUS
               </span>
-              <span className="text-xs font-mono text-slate-400">
+              <span className="text-xs font-mono text-theme-muted">
                 Affected Area: {event.affectedAreaKm2} km² ({event.affectedPopulationEstimate})
               </span>
             </div>
 
-            <p className="text-sm text-slate-200 leading-relaxed font-sans font-normal">
+            <p className="text-sm text-theme-text leading-relaxed font-sans font-normal">
               {event.summary}
             </p>
 
-            <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/30 text-xs text-slate-300">
+            <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/30 text-xs text-theme-text">
               <span className="font-mono text-cyan-400 font-bold uppercase mr-1.5">Action Directive:</span>
               {event.recommendedAction}
             </div>
 
             {/* Quick Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono pt-2">
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase">Total Raw Pings</span>
-                <p className="text-base font-bold text-slate-100 mt-0.5">{event.totalReports.toLocaleString()}</p>
+              <div className="p-3 rounded-lg bg-theme-surface/60 border border-theme-border">
+                <span className="text-[10px] text-theme-muted uppercase">Total Raw Pings</span>
+                <p className="text-base font-bold text-theme-text mt-0.5">{event.totalReports.toLocaleString()}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase">Verified Pings</span>
+              <div className="p-3 rounded-lg bg-theme-surface/60 border border-theme-border">
+                <span className="text-[10px] text-theme-muted uppercase">Verified Pings</span>
                 <p className="text-base font-bold text-emerald-400 mt-0.5">{event.verifiedReports.toLocaleString()}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase">Unique Reporters</span>
-                <p className="text-base font-bold text-slate-100 mt-0.5">{event.uniqueSources}</p>
+              <div className="p-3 rounded-lg bg-theme-surface/60 border border-theme-border">
+                <span className="text-[10px] text-theme-muted uppercase">Unique Reporters</span>
+                <p className="text-base font-bold text-theme-text mt-0.5">{event.uniqueSources}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase">Cluster Radius</span>
+              <div className="p-3 rounded-lg bg-theme-surface/60 border border-theme-border">
+                <span className="text-[10px] text-theme-muted uppercase">Cluster Radius</span>
                 <p className="text-base font-bold text-cyan-400 mt-0.5">{event.clusterRadiusKm} km</p>
               </div>
             </div>
           </div>
 
           {/* Right 4 Cols: Trust Score & Multi-Source Fusion Gauges */}
-          <div className="lg:col-span-4 p-6 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col items-center justify-center text-center space-y-4">
+          <div className="lg:col-span-4 p-6 rounded-xl bg-theme-surface/80 border border-theme-border flex flex-col items-center justify-center text-center space-y-4">
             <TrustScoreGauge
               score={event.trustScore}
               size="lg"
@@ -138,7 +138,7 @@ export const EventDetailPage: React.FC = () => {
               subtext="AI Verification Confidence: 94%"
             />
 
-            <div className="w-full space-y-1.5 pt-3 border-t border-slate-800 text-xs font-mono text-slate-400">
+            <div className="w-full space-y-1.5 pt-3 border-t border-theme-border text-xs font-mono text-theme-muted">
               <div className="flex justify-between">
                 <span>Multi-Source Fusion:</span>
                 <span className="text-cyan-400 font-bold">{event.fusionConfidence}%</span>
@@ -156,7 +156,7 @@ export const EventDetailPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left 6 Cols: Localized Cluster Map */}
         <div className="lg:col-span-6 space-y-3">
-          <h3 className="text-xs font-mono uppercase font-bold text-slate-300 flex items-center gap-2">
+          <h3 className="text-xs font-mono uppercase font-bold text-theme-text flex items-center gap-2">
             <MapPin className="w-4 h-4 text-cyan-400" />
             Localized Incident Surveillance Radius ({event.clusterRadiusKm}km)
           </h3>
@@ -172,32 +172,32 @@ export const EventDetailPage: React.FC = () => {
         {/* Right 6 Cols: AWS Ground Station Sensor Telemetry */}
         <div className="lg:col-span-6 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-mono uppercase font-bold text-slate-300 flex items-center gap-2">
+            <h3 className="text-xs font-mono uppercase font-bold text-theme-text flex items-center gap-2">
               <Radio className="w-4 h-4 text-emerald-400" />
               Corroborating AWS Sensor Nodes ({event.telemetry.length} Active)
             </h3>
-            <span className="text-[10px] font-mono text-slate-500">Rapid Scan 30s</span>
+            <span className="text-[10px] font-mono text-theme-muted">Rapid Scan 30s</span>
           </div>
 
           <div className="space-y-3">
             {event.telemetry.map((st: WeatherStationTelemetry) => (
               <div
                 key={st.stationId}
-                className="p-4 rounded-xl bg-command-card border border-slate-800 space-y-2 font-mono text-xs"
+                className="p-4 rounded-xl bg-theme-card border border-theme-border space-y-2 font-mono text-xs"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-100">{st.name}</span>
+                  <span className="font-bold text-theme-text">{st.name}</span>
                   <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
                     {st.status}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-theme-border text-[11px] text-theme-muted">
                   <div>
                     Rain Past Hour: <span className="text-cyan-400 font-bold">{st.rainfallPastHourMm} mm</span>
                   </div>
                   <div>
-                    Wind Gusts: <span className="text-slate-200 font-bold">{st.windSpeedKmh} km/h {st.windDirection}</span>
+                    Wind Gusts: <span className="text-theme-text font-bold">{st.windSpeedKmh} km/h {st.windDirection}</span>
                   </div>
                   <div>
                     Water Height: <span className="text-red-400 font-bold">{st.waterLevelMeters || 1.8} m</span>

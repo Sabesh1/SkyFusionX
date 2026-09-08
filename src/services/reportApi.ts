@@ -26,9 +26,11 @@ export const reportApi = {
     if (backendReports && backendReports.length > 0) {
       let mapped = backendReports.map(br => ({
         id: br.id,
-        title: `${br.event_type || 'Report'} Ping: ${br.city || 'Unknown Location'}`,
+        title: `${br.event_type || 'Report'} Ping: ${br.city || br.resolved_city || 'Unknown Location'}`,
         text: br.content,
-        locationName: br.city || 'Unknown Location',
+        city: br.city || br.resolved_city || 'Unknown Location',
+        version: br.version ?? 0,
+        locationName: br.city || br.resolved_city || 'Unknown Location',
         district: br.district || 'Unknown District',
         state: br.state || 'Unknown State',
         coordinates: { lat: br.latitude, lng: br.longitude },
@@ -44,15 +46,15 @@ export const reportApi = {
         timestamp: br.observed_at,
         evidence: br.media_url ? [{ type: 'image' as const, url: br.media_url, capturedAt: br.observed_at, hasExifData: false }] : [],
         verificationFactors: {
-          sourceCredibility: 80,
-          locationMatch: 90,
-          timestampValidity: 100,
-          weatherApiMatch: 70,
-          nearbyReports: 50,
-          visualEvidence: br.media_url ? 90 : 20,
+          sourceCredibility: Math.round(br.trust_score * 0.9) || 80,
+          locationMatch: Math.round(br.location_confidence ? br.location_confidence * 100 : 90),
+          timestampValidity: 95,
+          weatherApiMatch: br.weather_score || 85,
+          nearbyReports: br.nearby_reports_score || 70,
+          visualEvidence: br.image_analyzed ? 90 : (br.media_url ? 60 : 20),
           satelliteCorrelation: 80,
         },
-        aiExplanation: `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
+        aiExplanation: br.verification_assessment || `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
         aiStatus: (() => {
           if (br.verification_status === 'PROCESSING') return 'PROCESSING';
           if (br.gemini_analyzed === true) return 'GEMINI ANALYZED';
@@ -105,9 +107,11 @@ export const reportApi = {
     if (br) {
       return {
         id: br.id,
-        title: `${br.event_type || 'Report'} Ping: ${br.city || 'Unknown Location'}`,
+        title: `${br.event_type || 'Report'} Ping: ${br.city || br.resolved_city || 'Unknown Location'}`,
         text: br.content,
-        locationName: br.city || 'Unknown Location',
+        city: br.city || br.resolved_city || 'Unknown Location',
+        version: br.version ?? 0,
+        locationName: br.city || br.resolved_city || 'Unknown Location',
         district: br.district || 'Unknown District',
         state: br.state || 'Unknown State',
         coordinates: { lat: br.latitude, lng: br.longitude },
@@ -123,16 +127,16 @@ export const reportApi = {
         timestamp: br.observed_at,
         evidence: br.media_url ? [{ type: 'image' as const, url: br.media_url, capturedAt: br.observed_at, hasExifData: false }] : [],
         verificationFactors: {
-          sourceCredibility: 80,
-          locationMatch: 90,
-          timestampValidity: 100,
-          weatherApiMatch: 70,
-          nearbyReports: 50,
-          visualEvidence: br.media_url ? 90 : 20,
+          sourceCredibility: Math.round(br.trust_score * 0.9) || 80,
+          locationMatch: Math.round(br.location_confidence ? br.location_confidence * 100 : 90),
+          timestampValidity: 95,
+          weatherApiMatch: br.weather_score || 85,
+          nearbyReports: br.nearby_reports_score || 70,
+          visualEvidence: br.image_analyzed ? 90 : (br.media_url ? 60 : 20),
           satelliteCorrelation: 80,
         },
-        aiExplanation: `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
-        aiStatus: br.verification_status === 'PROCESSING' ? 'PROCESSING' : (br.model_version?.includes('gemini') ? 'GEMINI ANALYZED' : (br.model_version === 'v1' ? 'FALLBACK' : 'FAILED')),
+        aiExplanation: br.verification_assessment || `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
+        aiStatus: br.verification_status === 'PROCESSING' ? 'PROCESSING' : (br.gemini_analyzed ? 'GEMINI ANALYZED' : 'FALLBACK'),
         modelVersion: br.model_version,
         mlEventType: br.ml_event_type,
         mlConfidence: br.ml_confidence,
@@ -149,7 +153,14 @@ export const reportApi = {
         isDuplicate: br.is_duplicate,
         duplicateGroupId: br.duplicate_group_id,
         duplicateSimilarity: br.duplicate_similarity,
-        duplicateOfId: br.duplicate_of_id
+        duplicateOfId: br.duplicate_of_id,
+        geminiAnalyzed: br.gemini_analyzed || false,
+        imageAnalyzed: br.image_analyzed || false,
+        verificationAssessment: br.verification_assessment,
+        geminiEvidence: (() => {
+          if (!br.gemini_evidence_json) return null;
+          try { return JSON.parse(br.gemini_evidence_json); } catch { return null; }
+        })()
       } as WeatherReport;
     }
     return null;
@@ -162,25 +173,42 @@ export const reportApi = {
     longitude: number;
     observed_at?: string;
     city?: string;
+    district?: string;
     state?: string;
     event_type?: string;
     severity?: number;
     media_url?: string;
+    content_hash?: string;
+    raw_payload?: Record<string, unknown>;
   }): Promise<{ status: string; observation_id: string } | null> {
+    const contentHash = reportData.content_hash || (() => {
+      const raw = `${reportData.content}|${reportData.latitude}|${reportData.longitude}|${reportData.observed_at || new Date().toISOString()}`;
+      return Array.from(new TextEncoder().encode(raw)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+    })();
+
     const res = await apiClient.post<{ status: string; observation_id: string }>(
       '/api/v1/observations',
       {
-        source: reportData.source || 'Citizen App',
-        source_event_id: `CIT-${Date.now()}`,
+        source: (reportData.source || 'citizen_app').toLowerCase().replace(/\s+/g, '_'),
+        source_event_id: `CIT-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         observed_at: reportData.observed_at || new Date().toISOString(),
         content: reportData.content,
         latitude: reportData.latitude,
         longitude: reportData.longitude,
         city: reportData.city || 'Unknown',
+        district: reportData.district || reportData.city || 'Unknown',
         state: reportData.state || 'Unknown',
         event_type: reportData.event_type || 'OTHER',
-        severity: reportData.severity || 1,
-        media_url: reportData.media_url,
+        severity: Math.min(5, Math.max(1, reportData.severity || 1)),
+        media_url: reportData.media_url || undefined,
+        content_hash: contentHash,
+        raw_payload: reportData.raw_payload || {
+          source: (reportData.source || 'citizen_app').toLowerCase().replace(/\s+/g, '_'),
+          observed_at: reportData.observed_at || new Date().toISOString(),
+          city: reportData.city || 'Unknown',
+          state: reportData.state || 'Unknown',
+          event_type: reportData.event_type || 'OTHER',
+        },
         is_mock: false,
       }
     );

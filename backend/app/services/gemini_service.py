@@ -216,12 +216,13 @@ class GeminiService:
             response_mime_type="application/json",
             response_schema=GeminiEvidenceResponse,
             temperature=0.0,
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
         )
 
         if image_data and image_mime_type:
             # Multimodal: text + image
             contents = [
-                types.Part.from_text(text_prompt),
+                types.Part.from_text(text=text_prompt),
                 types.Part.from_bytes(data=image_data, mime_type=image_mime_type),
             ]
             logger.info(f"Gemini evidence analysis: text+image ({len(image_data)} bytes, {image_mime_type})")
@@ -229,17 +230,21 @@ class GeminiService:
             contents = text_prompt
             logger.info("Gemini evidence analysis: text-only (no image provided)")
 
+        import hashlib
+        img_hash = None
+        if image_data:
+            img_hash = hashlib.sha256(image_data).hexdigest()
+            
         result = await self._call_gemini_structured(contents, config)
         if result:
             # Mark image_analyzed correctly
             if image_data and image_mime_type:
                 result.image_analyzed = True
             result.gemini_analyzed = True
-            logger.info(
-                f"Gemini evidence analysis success: "
-                f"event={result.event_type} trust={result.trust_score} "
-                f"status={result.verification_status} image={result.image_analyzed}"
-            )
+            logger.info(f"[GEMINI] operation=image_analysis image_hash={img_hash or 'none'} status=success")
+        else:
+            logger.info(f"[GEMINI] operation=image_analysis image_hash={img_hash or 'none'} status=failure")
+            
         return result
 
     # ─── Copilot Chat ──────────────────────────────────────────────────────────
@@ -292,8 +297,7 @@ class GeminiService:
 
             start_time = time.time()
             response = await asyncio.wait_for(
-                asyncio.to_thread(
-                    self.client.models.generate_content,
+                self.client.aio.models.generate_content(
                     model=self.model,
                     contents=prompt,
                     config=config
@@ -301,20 +305,20 @@ class GeminiService:
                 timeout=self.timeout
             )
             elapsed = time.time() - start_time
-            logger.info(f"Gemini Copilot chat completed in {elapsed:.2f}s")
+            logger.info(f"[GEMINI] operation=copilot_chat status=success")
 
             if response.text:
                 return response.text
             return "I could not generate an answer based on the provided project context."
 
         except asyncio.TimeoutError:
-            logger.error("Gemini Copilot chat timed out.")
+            logger.error("[GEMINI] operation=copilot_chat status=timeout")
             return "The analysis took too long. Please try again."
         except APIError as e:
-            logger.error(f"Gemini API Error in copilot chat: {e}")
+            logger.error(f"[GEMINI] operation=copilot_chat status=api_error error='{e}'")
             return "The AI service is temporarily unavailable. Please try again shortly."
         except Exception as e:
-            logger.error(f"Unexpected error in Gemini copilot chat: {e}")
+            logger.error(f"[GEMINI] operation=copilot_chat status=error error='{e}'")
             return "An unexpected error occurred. Please try again."
 
     # ─── Legacy simple method (kept for compatibility) ─────────────────────────
@@ -365,8 +369,7 @@ class GeminiService:
                 try:
                     start_time = time.time()
                     response = await asyncio.wait_for(
-                        asyncio.to_thread(
-                            self.client.models.generate_content,
+                        self.client.aio.models.generate_content(
                             model=model_name,
                             contents=contents,
                             config=config
@@ -419,3 +422,57 @@ class GeminiService:
 
 
 gemini_service = GeminiService()
+
+async def translate_alert(english_text: str, target_language: str) -> str:
+    """
+    Translates an English alert to the target language using Gemini.
+    """
+    try:
+        import os
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            logging.warning("GEMINI_API_KEY not set. Returning English text.")
+            return english_text
+
+        prompt = f"""
+You are translating an emergency weather alert.
+Translate the provided English alert into {target_language}.
+
+Preserve:
+- factual meaning
+- severity
+- locations
+- numbers
+- emergency instructions
+- organization names
+- helpline numbers
+
+Do not add information.
+Do not remove information.
+Do not summarize.
+Do not change the severity.
+Return only the translated alert.
+
+English Alert:
+{english_text}
+"""
+        import google.generativeai as genai
+        # Initialize within the method to ensure it's loaded
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+        
+        response = await asyncio.to_thread(
+            model.generate_content,
+            prompt
+        )
+        
+        if response and response.text:
+            logging.info(f"[GEMINI] operation=translation language={target_language} status=success")
+            return response.text.strip()
+        else:
+            logging.error(f"[GEMINI] operation=translation language={target_language} status=failure")
+            return english_text
+
+    except Exception as e:
+        logging.error(f"[GEMINI] operation=translation language={target_language} status=error error='{e}'")
+        return english_text

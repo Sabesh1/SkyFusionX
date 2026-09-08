@@ -37,7 +37,7 @@ async def event_stream(request: Request):
                 # Wait for a message
                 msg = await q.get()
                 yield {
-                    "event": "weather_event_update",
+                    "event": msg.get("type", "weather_event_update"),
                     "id": msg.get("event_id", "EVT-000"),
                     "data": json.dumps(msg)
                 }

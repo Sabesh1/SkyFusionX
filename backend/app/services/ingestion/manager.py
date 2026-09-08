@@ -46,8 +46,13 @@ class IngestionManager:
                             verification_status="UNVERIFIED",
                             severity=item.get("severity", 1)
                         )
-                        # Publish to Kafka
-                        await producer_service.publish(TOPIC_WEATHER_OBSERVATIONS, event)
+                        # Bypass Kafka for local synchronous processing
+                        db = SessionLocal()
+                        try:
+                            saved_item = self._save_observation(db, item)
+                            db.commit()
+                        finally:
+                            db.close()
                 except Exception as e:
                     logger.error(f"[Ingestion] Error running adapter {adapter.__class__.__name__}: {e}")
         except Exception as e:
@@ -62,7 +67,11 @@ class IngestionManager:
         item.setdefault("ingested_at", datetime.datetime.utcnow())
         item.setdefault("id", str(uuid.uuid4()))
 
-        obs = Observation(**item)
+        # Filter item to only include columns that exist on the Observation model
+        valid_keys = {column.name for column in Observation.__table__.columns}
+        filtered_item = {k: v for k, v in item.items() if k in valid_keys}
+
+        obs = Observation(**filtered_item)
         db.add(obs)
         try:
             # We flush so that if there's an IntegrityError (duplicate source_event_id), we catch it immediately.

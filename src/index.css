@@ -3,8 +3,34 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* LIGHT THEME */
+    --theme-bg: #F8FAFC;
+    --theme-surface: #FFFFFF;
+    --theme-card: #F1F5F9;
+    --theme-border: #E2E8F0;
+    --theme-border-hover: #CBD5E1;
+    --theme-muted: #64748B;
+    --theme-text: #0F172A;
+    --theme-glass: rgba(255, 255, 255, 0.7);
+    --theme-accent: #E5A962;
+  }
+  
+  .dark {
+    /* DARK AMOLED THEME */
+    --theme-bg: #000000;
+    --theme-surface: #0E0E11;
+    --theme-card: #141418;
+    --theme-border: #272734;
+    --theme-border-hover: #424252;
+    --theme-muted: #9D9DAE;
+    --theme-text: #EEEEF2;
+    --theme-glass: rgba(14, 14, 17, 0.6);
+    --theme-accent: #E5A962;
+  }
+
   body {
-    @apply bg-[#0F0F13] text-[#EEEEF2] antialiased overflow-x-hidden;
+    @apply bg-theme-bg text-theme-text antialiased overflow-x-hidden transition-colors duration-300;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     background-image: 
       radial-gradient(circle at 10% 20%, rgba(229, 169, 98, 0.04) 0%, transparent 40%),

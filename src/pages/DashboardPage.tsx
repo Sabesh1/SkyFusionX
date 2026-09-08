@@ -24,6 +24,7 @@ import {
   Globe,
   Map,
 } from 'lucide-react';
+import { apiClient } from '@/services/apiClient';
 
 export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -39,11 +40,59 @@ export const DashboardPage: React.FC = () => {
         weatherApi.getDashboardStats(),
         eventApi.getWeatherEvents(),
       ]);
-      setStats(statsData);
+      
+      // Calculate AI Truth Verified using the actual event records
+      let sumVerified = 0;
+      let sumTotal = 0;
+      eventsData.forEach(ev => {
+        sumVerified += (ev.verifiedReports || 0);
+        sumTotal += (ev.totalReports || 0);
+      });
+      const aiPercent = sumTotal > 0 ? ((sumVerified / sumTotal) * 100).toFixed(1) : '0.0';
+      
+      const updatedStats = {
+        ...statsData,
+        aiVerified: {
+          ...statsData.aiVerified,
+          value: `${sumVerified} (${aiPercent}%)`,
+        },
+        activeEvents: {
+          ...statsData.activeEvents,
+          value: eventsData.length > 0 ? eventsData.length : statsData.activeEvents.value
+        }
+      };
+      
+      setStats(updatedStats);
       setEvents(eventsData);
-      setSelectedEvent(eventsData[0]); // Default to Chennai
+      if (eventsData.length > 0 && !selectedEvent) setSelectedEvent(eventsData[0]);
     };
     fetchData();
+
+    // SSE listener for real-time updates
+    let evtSource: EventSource | null = null;
+    const setupSSE = async () => {
+      const isOnline = await apiClient.checkHealth();
+      if (!isOnline) return;
+      evtSource = apiClient.createEventSource('/api/v1/events/stream');
+      if (evtSource) {
+        evtSource.addEventListener('weather_event_update', () => {
+          // Re-fetch stats and events when any report is processed
+          fetchData();
+        });
+        evtSource.onerror = () => {
+          // Silently handle SSE errors — periodic refresh is fallback
+        };
+      }
+    };
+    setupSSE();
+
+    // Periodic soft-refresh every 30 seconds as fallback
+    const refreshInterval = setInterval(fetchData, 30000);
+
+    return () => {
+      if (evtSource) evtSource.close();
+      clearInterval(refreshInterval);
+    };
   }, []);
 
   return (
@@ -55,7 +104,7 @@ export const DashboardPage: React.FC = () => {
         actionButton={
           <div className="flex items-center gap-2">
             {/* 3D vs 2D Centerpiece Mode Switcher */}
-            <div className="flex items-center p-1 rounded-xl bg-[#121620] border border-slate-800/80">
+            <div className="flex items-center p-1 rounded-xl bg-theme-surface border border-theme-border/80">
               <button
                 onClick={() => {
                   soundFX.playClick();
@@ -64,7 +113,7 @@ export const DashboardPage: React.FC = () => {
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-medium transition-all ${
                   visualizationMode === '3d'
                     ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-semibold'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-theme-muted hover:text-theme-text'
                 }`}
               >
                 <Globe className="w-3.5 h-3.5" />
@@ -79,7 +128,7 @@ export const DashboardPage: React.FC = () => {
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-medium transition-all ${
                   visualizationMode === '2d'
                     ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-semibold'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-theme-muted hover:text-theme-text'
                 }`}
               >
                 <Map className="w-3.5 h-3.5" />
@@ -181,7 +230,7 @@ export const DashboardPage: React.FC = () => {
             )}
           </div>
 
-          <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
+          <div className="flex items-center justify-between text-xs font-mono text-theme-muted px-1">
             <span>
               {visualizationMode === '3d'
                 ? '3D orbital stream synchronized with INSAT-3D thermal scans'
@@ -196,7 +245,7 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-              <h3 className="text-xs font-mono uppercase font-bold text-slate-200">
+              <h3 className="text-xs font-mono uppercase font-bold text-theme-text">
                 Live Disaster Events
               </h3>
             </div>
@@ -220,30 +269,30 @@ export const DashboardPage: React.FC = () => {
                   onClick={() => setSelectedEvent(event)}
                   className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-sm ${
                     isSelected
-                      ? 'bg-[#141926] border-cyan-500/60 ring-1 ring-cyan-500/30'
-                      : 'bg-[#121620] border-slate-800/80 hover:border-slate-700 hover:bg-[#161B28]'
+                      ? 'bg-theme-surface border-cyan-500/60 ring-1 ring-cyan-500/30'
+                      : 'bg-theme-card border-theme-border/80 hover:border-theme-border-hover hover:bg-theme-surface'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
                         <SeverityBadge severity={event.severity} size="sm" />
-                        <span className="text-xs font-bold text-slate-100 font-sans">
+                        <span className="text-xs font-bold text-theme-text font-sans">
                           {event.eventName}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 font-sans mt-1">{event.location}</p>
+                      <p className="text-xs text-theme-muted font-sans mt-1">{event.location}</p>
                     </div>
 
                     <div className="text-right font-mono shrink-0">
                       <div className="text-sm font-bold text-emerald-400">
                         {event.trustScore}%
                       </div>
-                      <div className="text-[10px] text-slate-500 uppercase">Trust</div>
+                      <div className="text-[10px] text-theme-muted uppercase">Trust</div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-800/60 text-[11px] font-mono text-slate-400">
+                  <div className="flex items-center justify-between pt-3 mt-2 border-t border-theme-border/60 text-[11px] font-mono text-theme-muted">
                     <span>{event.totalReports} reports</span>
                     <button
                       onClick={e => {

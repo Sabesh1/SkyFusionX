@@ -24,14 +24,14 @@ export const PredictionTimelineChart: React.FC<PredictionTimelineChartProps> = (
   }));
 
   return (
-    <div className="p-6 rounded-3xl bg-gradient-to-b from-[#1C1C24] to-[#131318] border border-[#2B2B3C] space-y-4 shadow-card-emboss">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#252534] pb-3">
+    <div className="p-6 rounded-3xl bg-theme-card border border-theme-border/80 space-y-4 shadow-card-emboss">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-theme-border/80 pb-3">
         <div>
           <h4 className="text-sm font-bold font-mono text-[#F3D9B5] flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#E5A962] animate-pulse" />
             AI Hydrodynamic Rainfall & Flood Escalation Wave
           </h4>
-          <p className="text-xs text-slate-400 font-sans mt-0.5">
+          <p className="text-xs text-theme-muted font-sans mt-0.5">
             15-minute forecasting intervals across urban river and drainage catchments.
           </p>
         </div>
@@ -115,7 +115,7 @@ export const PredictionTimelineChart: React.FC<PredictionTimelineChartProps> = (
         </ResponsiveContainer>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-[#252534]">
+      <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-theme-muted pt-2 border-t border-theme-border/80">
         <span>Model: NeuralHydro-LSTM v3.4</span>
         <span className="text-[#E5A962]">Peak Inundation Window: {prediction.peakTime}</span>
       </div>

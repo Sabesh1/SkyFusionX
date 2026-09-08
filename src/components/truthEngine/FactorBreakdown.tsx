@@ -80,7 +80,7 @@ export const FactorBreakdown: React.FC<FactorBreakdownProps> = ({
         return (
           <div
             key={item.key}
-            className="p-3.5 rounded-2xl bg-[#16161E] border border-[#272736] space-y-2 shadow-card-inset"
+            className="p-3.5 rounded-2xl bg-theme-surface border border-theme-border/80 space-y-2 shadow-card-inset"
           >
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
@@ -88,8 +88,8 @@ export const FactorBreakdown: React.FC<FactorBreakdownProps> = ({
                   <Icon className="w-3.5 h-3.5 text-[#E5A962]" />
                 </div>
                 <div>
-                  <span className="font-semibold text-slate-200 font-sans">{item.label}</span>
-                  <span className="ml-2 text-[10px] font-mono text-slate-500 font-bold">
+                  <span className="font-semibold text-theme-text font-sans">{item.label}</span>
+                  <span className="ml-2 text-[10px] font-mono text-theme-muted font-bold">
                     ({item.weight} Weight)
                   </span>
                 </div>
@@ -119,7 +119,7 @@ export const FactorBreakdown: React.FC<FactorBreakdownProps> = ({
               </div>
             )}
 
-            <p className="text-[10px] text-slate-400 font-sans truncate">{item.description}</p>
+            <p className="text-[10px] text-theme-muted font-sans truncate">{item.description}</p>
           </div>
         );
       })}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fusionApi } from '../services/fusionApi';
+import { eventApi } from '../services/eventApi';
 import { DataSourceHealth, EventFusionBreakdown } from '../types/fusion';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { FusionPipelineGraphic } from '../components/fusion/FusionPipelineGraphic';
@@ -10,11 +11,21 @@ export const DataFusionPage: React.FC = () => {
   const [sources, setSources] = useState<DataSourceHealth[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('EVT-TN-01');
   const [fusionBreakdown, setFusionBreakdown] = useState<EventFusionBreakdown | null>(null);
+  const [activeEvents, setActiveEvents] = useState<{id: string, name: string}[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       const srcData = await fusionApi.getDataSourceHealth();
       setSources(srcData);
+      
+      const evts = await eventApi.getWeatherEvents();
+      if (evts && evts.length > 0) {
+        setActiveEvents(evts.map(e => ({ id: e.id, name: e.eventName || e.title || 'Event' })));
+        if (!activeEvents.find(e => e.id === selectedEventId) && selectedEventId === 'EVT-TN-01') {
+          setSelectedEventId(evts[0].id);
+        }
+      }
+      
       const fusionData = await fusionApi.getEventFusionBreakdown(selectedEventId);
       setFusionBreakdown(fusionData);
     };
@@ -34,34 +45,34 @@ export const DataFusionPage: React.FC = () => {
 
       {/* Flagship Event Multi-Sensor Convergence Meter */}
       {fusionBreakdown && (
-        <div className="p-6 rounded-2xl bg-command-card border border-cyan-500/40 shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div className="p-6 rounded-2xl bg-theme-card border border-cyan-500/40 shadow-2xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme-border pb-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] font-mono font-bold uppercase">
                   Multi-Modal Convergence Meter
                 </span>
-                <span className="font-mono text-xs text-slate-400">{fusionBreakdown.eventId}</span>
+                <span className="font-mono text-xs text-theme-muted">{fusionBreakdown.eventId}</span>
               </div>
-              <h3 className="text-base font-bold text-slate-100 font-display mt-1">
+              <h3 className="text-base font-bold text-theme-text font-display mt-1">
                 {fusionBreakdown.eventName} ({fusionBreakdown.location})
               </h3>
             </div>
 
             {/* Event Selector Tabs */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              {[
+              {(activeEvents.length > 0 ? activeEvents : [
                 { id: 'EVT-TN-01', name: 'Chennai Heavy Rain' },
                 { id: 'EVT-TS-01', name: 'Hyderabad Flood' },
                 { id: 'EVT-KA-01', name: 'Bengaluru Thunderstorm' },
-              ].map(ev => (
+              ]).slice(0, 3).map(ev => (
                 <button
                   key={ev.id}
                   onClick={() => setSelectedEventId(ev.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
                     selectedEventId === ev.id
                       ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-bold'
-                      : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                      : 'bg-theme-surface border border-theme-border text-theme-muted hover:text-theme-text'
                   }`}
                 >
                   {ev.name.split(' ')[0]}
@@ -73,8 +84,8 @@ export const DataFusionPage: React.FC = () => {
           {/* Fusion Confidence Score Card */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             {/* Left 4 Cols: Big Confidence Gauge */}
-            <div className="md:col-span-4 p-6 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col items-center justify-center text-center space-y-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+            <div className="md:col-span-4 p-6 rounded-xl bg-theme-surface/80 border border-theme-border flex flex-col items-center justify-center text-center space-y-2">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-theme-muted">
                 Overall Fusion Confidence
               </span>
               <div className="text-5xl font-extrabold font-mono text-cyan-400">
@@ -88,45 +99,45 @@ export const DataFusionPage: React.FC = () => {
 
             {/* Right 8 Cols: Specific Pipeline Correlations */}
             <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-xs">
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase">Citizen Reports</span>
-                <div className="text-lg font-bold text-slate-100">{fusionBreakdown.citizenReportCount} Ground Pings</div>
+              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
+                <span className="text-[10px] text-theme-muted uppercase">Citizen Reports</span>
+                <div className="text-lg font-bold text-theme-text">{fusionBreakdown.citizenReportCount} Ground Pings</div>
                 <div className="text-[10px] text-cyan-400">100% Geo-Triangulated</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase">Weather Stations</span>
+              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
+                <span className="text-[10px] text-theme-muted uppercase">Weather Stations</span>
                 <div className="text-lg font-bold text-emerald-400">{fusionBreakdown.weatherStationCount} Active AWS</div>
-                <div className="text-[10px] text-slate-400">Rain &gt; 50mm/hr</div>
+                <div className="text-[10px] text-theme-muted">Rain &gt; 50mm/hr</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase">Satellite Match</span>
+              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
+                <span className="text-[10px] text-theme-muted uppercase">Satellite Match</span>
                 <div className="text-lg font-bold text-blue-400">{fusionBreakdown.satelliteCorrelationPct}%</div>
-                <div className="text-[10px] text-slate-400">INSAT-3D Infrared</div>
+                <div className="text-[10px] text-theme-muted">INSAT-3D Infrared</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase">Doppler Radar</span>
+              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
+                <span className="text-[10px] text-theme-muted uppercase">Doppler Radar</span>
                 <div className="text-lg font-bold text-purple-400">{fusionBreakdown.radarCorrelationPct}%</div>
-                <div className="text-[10px] text-slate-400">54 dBZ Core Reflectivity</div>
+                <div className="text-[10px] text-theme-muted">54 dBZ Core Reflectivity</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase">Weather APIs</span>
+              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
+                <span className="text-[10px] text-theme-muted uppercase">Weather APIs</span>
                 <div className="text-lg font-bold text-amber-400">{fusionBreakdown.apiCorrelationPct}%</div>
-                <div className="text-[10px] text-slate-400">IMD NWP Models</div>
+                <div className="text-[10px] text-theme-muted">IMD NWP Models</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase">Social Signals</span>
+              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
+                <span className="text-[10px] text-theme-muted uppercase">Social Signals</span>
                 <div className="text-lg font-bold text-pink-400">{fusionBreakdown.socialSignalsScorePct}%</div>
-                <div className="text-[10px] text-slate-400">NLP Keyword Surges</div>
+                <div className="text-[10px] text-theme-muted">NLP Keyword Surges</div>
               </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/30 text-xs text-slate-300">
+          <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/30 text-xs text-theme-text">
             <span className="font-mono text-cyan-400 font-bold uppercase mr-1.5">Fusion Synthesis:</span>
             {fusionBreakdown.fusionVerdict}
           </div>
@@ -135,7 +146,7 @@ export const DataFusionPage: React.FC = () => {
 
       {/* 6 Real-Time Data Source Health Cards */}
       <div className="space-y-4">
-        <h3 className="text-xs font-mono uppercase font-bold tracking-wider text-slate-400">
+        <h3 className="text-xs font-mono uppercase font-bold tracking-wider text-theme-muted">
           6 Live Telemetry Pipelines (Status & Diagnostics)
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

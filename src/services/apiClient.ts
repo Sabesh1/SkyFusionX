@@ -87,7 +87,7 @@ class ApiClient {
       return null;
     }
   }
-  
+
   async patch<T, B = unknown>(endpoint: string, body: B): Promise<T | null> {
     const isOnline = await this.checkHealth();
     if (!isOnline) return null;
@@ -111,7 +111,7 @@ class ApiClient {
       return null;
     }
   }
-  
+
   async delete(endpoint: string): Promise<boolean> {
     const isOnline = await this.checkHealth();
     if (!isOnline) return false;

@@ -26,6 +26,8 @@ export interface WeatherReport {
   id: string;
   title: string;
   text: string;
+  city?: string;
+  version?: number;
   locationName: string;
   district: string;
   state: string;

@@ -16,10 +16,12 @@ import {
   PlusCircle,
   ShieldCheck,
   Server,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export const TopNavbar: React.FC = () => {
-  const { language, setLanguage, setIsSearchOpen, refreshData, lastSyncTime } = useApp();
+  const { language, setLanguage, setIsSearchOpen, refreshData, lastSyncTime, theme, setTheme } = useApp();
   const { isDemoMode, toggleDemoMode, startTour, isTourActive } = useDemoMode();
   const [timeString, setTimeString] = useState('');
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -71,7 +73,7 @@ export const TopNavbar: React.FC = () => {
 
   return (
     <>
-      <header className="h-16 px-6 bg-[#0B0E14] border-b border-slate-800/80 flex items-center justify-between sticky top-0 z-30 select-none">
+      <header className="h-16 px-6 bg-theme-surface border-b border-theme-border/80 flex items-center justify-between sticky top-0 z-30 select-none">
         {/* Left: Global Search Pill & Backend Status */}
         <div className="flex items-center gap-3 flex-1 max-w-md">
           <button
@@ -79,13 +81,13 @@ export const TopNavbar: React.FC = () => {
               soundFX.playClick();
               setIsSearchOpen(true);
             }}
-            className="w-full flex items-center justify-between px-4 py-2 rounded-xl bg-[#121620] border border-slate-800/80 hover:border-slate-700 text-slate-400 text-xs transition-all"
+            className="w-full flex items-center justify-between px-4 py-2 rounded-xl bg-theme-card border border-theme-border/80 hover:border-theme-border-hover text-theme-muted text-xs transition-all"
           >
             <div className="flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-slate-400" />
+              <Search className="w-4 h-4 text-theme-muted" />
               <span className="font-sans">Search incidents, stations, cities...</span>
             </div>
-            <kbd className="hidden sm:inline-block px-2 py-0.5 rounded bg-[#1A1F2C] text-[10px] font-mono text-slate-400 border border-slate-700">
+            <kbd className="hidden sm:inline-block px-2 py-0.5 rounded bg-theme-surface text-[10px] font-mono text-theme-muted border border-theme-border-hover">
               Ctrl+K
             </kbd>
           </button>
@@ -132,7 +134,7 @@ export const TopNavbar: React.FC = () => {
             }}
             className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-semibold transition-all ${
               isTourActive
-                ? 'bg-purple-600 text-white border-purple-400'
+                ? 'bg-purple-600 text-theme-text border-purple-400'
                 : 'bg-purple-950/30 border-purple-500/30 text-purple-300 hover:bg-purple-900/40'
             }`}
           >
@@ -141,8 +143,8 @@ export const TopNavbar: React.FC = () => {
           </button>
 
           {/* IST Time */}
-          <div className="hidden lg:flex items-center gap-1.5 font-mono text-xs text-slate-300 px-3 py-1.5 rounded-xl bg-[#121620] border border-slate-800/80">
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
+          <div className="hidden lg:flex items-center gap-1.5 font-mono text-xs text-theme-text px-3 py-1.5 rounded-xl bg-theme-card border border-theme-border/80">
+            <Clock className="w-3.5 h-3.5 text-theme-muted" />
             <span>{timeString} IST</span>
           </div>
 
@@ -153,14 +155,14 @@ export const TopNavbar: React.FC = () => {
                 soundFX.playClick();
                 setShowLangMenu(!showLangMenu);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121620] border border-slate-800/80 text-xs font-medium text-slate-300 hover:border-slate-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-theme-card border border-theme-border/80 text-xs font-medium text-theme-text hover:border-theme-border-hover transition-colors"
             >
-              <Globe className="w-3.5 h-3.5 text-slate-400" />
+              <Globe className="w-3.5 h-3.5 text-theme-muted" />
               <span>{currentLang.native}</span>
             </button>
 
             {showLangMenu && (
-              <div className="absolute right-0 mt-2 w-44 bg-[#121620] border border-slate-800 rounded-xl shadow-2xl py-1 z-50 animate-fadeIn">
+              <div className="absolute right-0 mt-2 w-44 bg-theme-card border border-theme-border rounded-xl shadow-2xl py-1 z-50 animate-fadeIn">
                 {languages.map(lang => (
                   <button
                     key={lang.code}
@@ -169,8 +171,8 @@ export const TopNavbar: React.FC = () => {
                       setLanguage(lang.code);
                       setShowLangMenu(false);
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-[#1A1F2C] transition-colors ${
-                      language === lang.code ? 'text-cyan-400 font-semibold' : 'text-slate-300'
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-theme-surface transition-colors ${
+                      language === lang.code ? 'text-cyan-400 font-semibold' : 'text-theme-text'
                     }`}
                   >
                     <span>{lang.label} ({lang.native})</span>
@@ -180,22 +182,38 @@ export const TopNavbar: React.FC = () => {
             )}
           </div>
 
+          {/* Theme Toggle */}
+          <button
+            onClick={() => {
+              soundFX.playClick();
+              setTheme(theme === 'dark' ? 'light' : 'dark');
+            }}
+            className="p-2 rounded-xl bg-theme-card border border-theme-border/80 hover:border-theme-border-hover text-theme-text transition-colors"
+            title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark AMOLED Theme'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-theme-muted" />
+            ) : (
+              <Moon className="w-4 h-4 text-theme-muted" />
+            )}
+          </button>
+
           {/* Notifications */}
           <button
             onClick={() => {
               soundFX.playClick();
               setShowNotifMenu(!showNotifMenu);
             }}
-            className="relative p-2 rounded-xl bg-[#121620] border border-slate-800/80 hover:border-slate-700 text-slate-300 transition-colors"
+            className="relative p-2 rounded-xl bg-theme-card border border-theme-border/80 hover:border-theme-border-hover text-theme-text transition-colors"
           >
-            <Bell className="w-4 h-4 text-slate-400" />
+            <Bell className="w-4 h-4 text-theme-muted" />
             <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 text-slate-950 text-[9px] font-bold flex items-center justify-center">
               4
             </span>
           </button>
 
           {/* Operator Avatar */}
-          <div className="w-8 h-8 rounded-xl bg-[#121620] border border-slate-800/80 flex items-center justify-center text-slate-300 text-xs font-mono font-bold">
+          <div className="w-8 h-8 rounded-xl bg-theme-card border border-theme-border/80 flex items-center justify-center text-theme-text text-xs font-mono font-bold">
             ND
           </div>
         </div>

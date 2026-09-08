@@ -33,12 +33,12 @@ export const WeatherGlobe3D: React.FC<WeatherGlobe3DProps> = ({
 
       <div
         style={{ height: height || '500px' }}
-        className={`relative w-full rounded-2xl overflow-hidden bg-[#070A11] border border-slate-800/80 shadow-sm select-none flex items-center justify-center ${className}`}
+        className={`relative w-full rounded-2xl overflow-hidden bg-theme-bg border border-theme-border/80 shadow-sm select-none flex items-center justify-center ${className}`}
       >
         {/* Top Left Professional Satellite Status Badge */}
-        <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0B101D]/85 border border-slate-800/80 backdrop-blur-md">
+        <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-theme-surface/85 border border-theme-border/80 backdrop-blur-md">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-          <span className="text-xs font-mono font-semibold text-slate-200">
+          <span className="text-xs font-mono font-semibold text-theme-text">
             3D EARTH SURVEILLANCE
           </span>
           <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/60 font-semibold">
@@ -88,7 +88,7 @@ export const WeatherGlobe3D: React.FC<WeatherGlobe3DProps> = ({
         </div>
 
         {/* Bottom Status Hint */}
-        <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2.5 text-[10px] font-mono text-slate-400 bg-[#0B101D]/75 px-3 py-1.5 rounded-xl border border-slate-800/60 backdrop-blur-md pointer-events-none">
+        <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2.5 text-[10px] font-mono text-theme-muted bg-theme-surface/75 px-3 py-1.5 rounded-xl border border-theme-border/60 backdrop-blur-md pointer-events-none">
           <div className="flex items-center gap-1">
             <Compass className="w-3 h-3 text-cyan-400" />
             <span>Continuous Orbital Rotation</span>

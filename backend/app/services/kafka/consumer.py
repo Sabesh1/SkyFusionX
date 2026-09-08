@@ -62,18 +62,14 @@ class KafkaConsumerService:
             logger.info("Kafka Consumer stopped.")
 
     async def _consume_loop(self):
-        # We will loop forever and attempt to connect
-        while self._running:
-            try:
-                await self.consumer.start()
-                logger.info("Kafka Consumer successfully connected and listening.")
-                break
-            except KafkaConnectionError as e:
-                logger.warning(f"Kafka Consumer connection failed: {e}. Retrying in 15 seconds...")
-                await asyncio.sleep(15)
-            except Exception as e:
-                logger.error(f"Unexpected error starting Kafka Consumer: {e}")
-                await asyncio.sleep(5)
+        # Single connection attempt — fail fast if Kafka not available
+        try:
+            await asyncio.wait_for(self.consumer.start(), timeout=3.0)
+            logger.info("Kafka Consumer successfully connected and listening.")
+        except (KafkaConnectionError, asyncio.TimeoutError, Exception) as e:
+            logger.warning(f"Kafka Consumer unavailable (expected for local dev): {e}")
+            self._running = False
+            return
 
         if not self._running:
             return
@@ -187,7 +183,7 @@ class KafkaConsumerService:
                     state=data.get("state"),
                     event_type=data.get("event_type") or "OTHER",
                     severity=data.get("severity", 1),
-                    is_mock=False
+                    is_mock=data.get("is_mock", False)
                 )
                 db.add(obs)
                 
@@ -225,23 +221,27 @@ class KafkaConsumerService:
             
             # Phase 6: Gemini Intelligence (Only for non-duplicates to save costs)
             if not obs.is_duplicate:
-                from app.services.gemini_service import gemini_service
-                gemini_res = await gemini_service.analyze_report(
-                    description=obs.content,
-                    city=loc_result.city,
-                    state=loc_result.state,
-                    source_type=data.get("source", "Citizen")
-                )
-                
-                if gemini_res:
-                    # Merge Gemini intelligence with existing ML outputs
-                    if gemini_res.confidence >= 0.7 or ml_confidence < 0.6:
-                         ml_event_type = gemini_res.event_type
-                         ml_confidence = gemini_res.confidence
-                         model_version = f"{model_version}+gemini" if model_version != "none" else "gemini"
+                if obs.is_mock:
+                    import logging
+                    logging.getLogger(__name__).info(f"Skipping Gemini analysis for mock Kafka observation {obs.id}")
+                else:
+                    from app.services.gemini_service import gemini_service
+                    gemini_res = await gemini_service.analyze_report(
+                        description=obs.content,
+                        city=loc_result.city,
+                        state=loc_result.state,
+                        source_type=data.get("source", "Citizen")
+                    )
                     
-                    trust_score = gemini_res.trust_score
-                    verification_rec = gemini_res.verification_recommendation
+                    if gemini_res:
+                        # Merge Gemini intelligence with existing ML outputs
+                        if gemini_res.confidence >= 0.7 or ml_confidence < 0.6:
+                             ml_event_type = gemini_res.event_type
+                             ml_confidence = gemini_res.confidence
+                             model_version = f"{model_version}+gemini" if model_version != "none" else "gemini"
+                        
+                        trust_score = gemini_res.trust_score
+                        verification_rec = gemini_res.verification_recommendation
 
             # Update Phase 5 Location fields
             obs.resolved_city = loc_result.city

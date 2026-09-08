@@ -59,9 +59,9 @@ export const PrioritizationMatrix: React.FC<{ alerts: WeatherAlert[] }> = ({ ale
   return (
     <div className="space-y-4">
       {/* Triage Queue Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#090D17]">
+      <div className="overflow-x-auto rounded-xl border border-theme-border bg-theme-surface">
         <table className="w-full text-left text-xs font-sans">
-          <thead className="bg-[#0D121F] border-b border-slate-800 text-[10px] font-mono uppercase text-slate-400">
+          <thead className="bg-theme-card border-b border-theme-border text-[10px] font-mono uppercase text-theme-muted">
             <tr>
               <th className="py-3 px-4">Event & Region</th>
               <th className="py-3 px-4">Severity</th>
@@ -72,15 +72,15 @@ export const PrioritizationMatrix: React.FC<{ alerts: WeatherAlert[] }> = ({ ale
               <th className="py-3 px-4 text-right">Triage Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-normal text-slate-300">
+          <tbody className="divide-y divide-slate-800/60 font-normal text-theme-text">
             {alerts.map(alert => {
               const actionBadge = actionLevelBadges[alert.actionLevel] || actionLevelBadges.LOW_MONITOR;
 
               return (
-                <tr key={alert.id} className="hover:bg-slate-900/40 transition-colors">
+                <tr key={alert.id} className="hover:bg-theme-surface/40 transition-colors">
                   <td className="py-3 px-4">
-                    <div className="font-bold text-slate-100">{alert.alertType}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">{alert.affectedRegion}</div>
+                    <div className="font-bold text-theme-text">{alert.alertType}</div>
+                    <div className="text-[11px] text-theme-muted font-mono">{alert.affectedRegion}</div>
                   </td>
                   <td className="py-3 px-4">
                     <SeverityBadge severity={alert.severity} size="sm" />
@@ -88,7 +88,7 @@ export const PrioritizationMatrix: React.FC<{ alerts: WeatherAlert[] }> = ({ ale
                   <td className="py-3 px-4 font-mono font-bold text-emerald-400">
                     {alert.trustScore}%
                   </td>
-                  <td className="py-3 px-4 font-mono text-slate-300">
+                  <td className="py-3 px-4 font-mono text-theme-text">
                     {alert.affectedPopulation}
                   </td>
                   <td className="py-3 px-4">
@@ -115,7 +115,7 @@ export const PrioritizationMatrix: React.FC<{ alerts: WeatherAlert[] }> = ({ ale
                         <button
                           onClick={() => navigate(`/events/${alert.eventId}`)}
                           title="View Incident"
-                          className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300"
+                          className="p-1.5 rounded bg-theme-card hover:bg-slate-700 text-theme-text hover:text-cyan-300"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </button>
@@ -141,7 +141,7 @@ export const PrioritizationMatrix: React.FC<{ alerts: WeatherAlert[] }> = ({ ale
 
                       <button
                         onClick={() => handleDismiss(alert.id)}
-                        className="p-1.5 rounded text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                        className="p-1.5 rounded text-theme-muted hover:text-theme-text hover:bg-theme-card"
                         title="Dismiss"
                       >
                         <X className="w-3.5 h-3.5" />

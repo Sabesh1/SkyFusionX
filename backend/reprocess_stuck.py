@@ -78,26 +78,74 @@ async def reprocess_all():
             print(f"  Content: {desc_preview}...")
             
             try:
+                if obs.is_mock:
+                    print("  [SKIP] Mock data skipped.")
+                    obs.verification_status = "UNVERIFIED"
+                    obs.gemini_analyzed = True
+                    db.commit()
+                    continue
+
                 # Gather evidence
-                from app.api.observations import _gather_evidence
+                from app.api.observations import _gather_evidence, _decode_image_from_url
                 evidence = _gather_evidence(obs, db)
                 
-                # Call Gemini
-                gemini_res = await gemini_service.analyze_report_with_evidence(
-                    description=obs.content,
-                    city=obs.resolved_city or obs.city,
-                    state=obs.resolved_state or obs.state,
-                    source_type=obs.source,
-                    report_timestamp=obs.observed_at.isoformat() if obs.observed_at else None,
-                    weather_context=evidence["weather_context"],
-                    nearby_observations=evidence["nearby_observations"],
-                    related_events=evidence["related_events"],
-                    existing_ml=evidence["existing_ml"],
-                )
+                import hashlib
+                import json as _json
+                img_hash = None
+                cached_obs = None
+                
+                image_bytes, _ = _decode_image_from_url(obs.media_url)
+                if image_bytes:
+                    img_hash = hashlib.sha256(image_bytes).hexdigest()
+                    obs.image_hash = img_hash
+                    
+                    cached_obs = db.query(Observation).filter(
+                        Observation.image_hash == img_hash,
+                        Observation.image_analyzed_state == "ANALYZED",
+                        Observation.id != obs.id
+                    ).first()
+
+                if cached_obs:
+                    print(f"  [CACHE HIT] Reusing previous analysis from {cached_obs.id}.")
+                    from app.services.gemini_service import GeminiEvidenceResponse
+                    try:
+                        cached_json = _json.loads(cached_obs.gemini_evidence_json) if cached_obs.gemini_evidence_json else {}
+                    except _json.JSONDecodeError:
+                        cached_json = {}
+                        
+                    gemini_res = GeminiEvidenceResponse(
+                        trust_score=cached_obs.trust_score or 50,
+                        confidence=cached_obs.ml_confidence or 0.5,
+                        event_type=cached_obs.ml_event_type or "OTHER",
+                        recommendation=cached_obs.verification_recommendation or "REQUIRES_HUMAN_REVIEW",
+                        supporting_evidence=cached_json.get("supporting", []),
+                        contradicting_evidence=cached_json.get("contradicting", []),
+                        evidence_assessment=cached_json.get("assessment", "Reused"),
+                        reason="Reused analysis from visually identical image",
+                        verification_status=cached_json.get("verification_status", "INSUFFICIENT_EVIDENCE"),
+                        image_analyzed=True
+                    )
+                else:
+                    # Call Gemini
+                    gemini_res = await gemini_service.analyze_report_with_evidence(
+                        description=obs.content,
+                        city=obs.resolved_city or obs.city,
+                        state=obs.resolved_state or obs.state,
+                        source_type=obs.source,
+                        report_timestamp=obs.observed_at.isoformat() if obs.observed_at else None,
+                        weather_context=evidence["weather_context"],
+                        nearby_observations=evidence["nearby_observations"],
+                        related_events=evidence["related_events"],
+                        existing_ml=evidence["existing_ml"],
+                    )
                 
                 if gemini_res:
                     obs.gemini_analyzed = True
                     obs.image_analyzed = gemini_res.image_analyzed
+                    if image_bytes and not cached_obs:
+                        obs.image_analyzed_state = "ANALYZED"
+                    elif image_bytes and cached_obs:
+                        obs.image_analyzed_state = "ANALYZED"
                     obs.trust_score = gemini_res.trust_score
                     obs.ml_confidence = gemini_res.confidence
                     obs.ml_event_type = gemini_res.event_type

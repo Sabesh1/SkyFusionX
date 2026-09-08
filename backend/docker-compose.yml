@@ -1,41 +1,62 @@
-version: "3.8"
+version: '3.8'
 
 services:
   db:
     image: postgis/postgis:15-3.3
-    container_name: weather_db
     environment:
-      POSTGRES_USER: weather_admin
-      POSTGRES_PASSWORD: weather_password
-      POSTGRES_DB: weather_db
+      POSTGRES_USER: weather
+      POSTGRES_PASSWORD: weather
+      POSTGRES_DB: weather
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
 
   kafka:
-    image: apache/kafka:latest
-    container_name: weather_kafka
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,OUTSIDE://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,OUTSIDE://localhost:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     ports:
       - "9092:9092"
-      - "29092:29092"
-    volumes:
-      - kafka_data:/var/lib/kafka/data
+
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+      - kafka
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://weather:weather@db:5432/weather
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+  stream:
+    build: ./backend/stream
+    depends_on:
+      - db
+      - kafka
+    environment:
+      - DATABASE_URL=postgresql://weather:weather@db:5432/weather
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
-  kafka_data:
 

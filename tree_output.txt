@@ -1,0 +1,194 @@
+├── README.md (0.1 KB) [STUB]
+├── argv.json (0.8 KB)
+├── backend/
+│   ├── .pytest_cache/
+│   │   ├── README.md (0.3 KB)
+│   │   └── v/
+│   │       └── cache/
+│   ├── README.md (3.3 KB)
+│   ├── alter_db.py (0.8 KB)
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── __init__.py (0.2 KB)
+│   │   │   ├── alerts.py (0.7 KB)
+│   │   │   ├── auth.py (0.9 KB)
+│   │   │   ├── copilot.py (14.8 KB)
+│   │   │   ├── dashboard.py (1.9 KB)
+│   │   │   ├── events.py (3.3 KB)
+│   │   │   ├── health.py (0.9 KB)
+│   │   │   ├── locations.py (1.8 KB)
+│   │   │   ├── observations.py (21.5 KB)
+│   │   │   └── stream.py (1.8 KB)
+│   │   ├── core/
+│   │   │   ├── config.py (1.4 KB)
+│   │   │   ├── database.py (0.5 KB)
+│   │   │   └── security.py (1.7 KB)
+│   │   ├── intelligence/
+│   │   │   ├── __init__.py (0.5 KB)
+│   │   │   ├── alert_engine.py (3.6 KB)
+│   │   │   ├── classifier.py (2.6 KB)
+│   │   │   ├── clustering_engine.py (6.3 KB)
+│   │   │   ├── fusion_engine.py (1.9 KB)
+│   │   │   ├── impact_engine.py (0.7 KB)
+│   │   │   ├── prediction_engine.py (2.2 KB)
+│   │   │   ├── risk_engine.py (2.6 KB)
+│   │   │   └── truth_engine.py (3.4 KB)
+│   │   ├── main.py (2.3 KB)
+│   │   ├── models/
+│   │   │   ├── __init__.py (0.3 KB)
+│   │   │   ├── alert.py (0.6 KB)
+│   │   │   ├── location.py (1.2 KB)
+│   │   │   ├── observation.py (2.6 KB)
+│   │   │   ├── user.py (0.4 KB)
+│   │   │   ├── weather_data.py (1.3 KB)
+│   │   │   └── weather_event.py (1.1 KB)
+│   │   ├── schemas/
+│   │   │   ├── __init__.py (0.0 KB) [STUB]
+│   │   │   ├── alert.py (0.3 KB)
+│   │   │   ├── common.py (0.2 KB)
+│   │   │   ├── event.py (0.9 KB)
+│   │   │   └── observation.py (1.9 KB)
+│   │   └── services/
+│   │       ├── duplicate_detector.py (5.1 KB)
+│   │       ├── gemini_service.py (20.7 KB)
+│   │       ├── ingestion/
+│   │       │   ├── base.py (1.2 KB)
+│   │       │   ├── manager.py (3.5 KB)
+│   │       │   └── open_meteo.py (4.2 KB)
+│   │       ├── kafka/
+│   │       │   ├── consumer.py (13.8 KB)
+│   │       │   ├── producer.py (2.0 KB)
+│   │       │   ├── schemas.py (0.6 KB)
+│   │       │   └── topics.py (0.1 KB) [STUB]
+│   │       ├── location_resolver.py (8.5 KB)
+│   │       ├── location_service.py (9.6 KB)
+│   │       ├── scheduler.py (0.9 KB)
+│   │       └── weather_ingestion.py (2.7 KB)
+│   ├── database/
+│   │   └── init.sql (2.3 KB)
+│   ├── docker-compose.yml (1.2 KB)
+│   ├── fix_seed.py (7.8 KB)
+│   ├── ml/
+│   │   ├── datasets/
+│   │   │   ├── cities.json (14.6 KB)
+│   │   ├── models/
+│   │   │   ├── classifier_metrics.json (1.8 KB)
+│   │   │   ├── trust_metrics.json (0.8 KB)
+│   │   ├── train_classifier.py (2.2 KB)
+│   │   └── train_trust_model.py (1.9 KB)
+│   ├── reprocess_stuck.py (6.8 KB)
+│   ├── run_local.py (0.7 KB)
+│   ├── scripts/
+│   │   ├── run_demo.py (2.6 KB)
+│   │   └── seed_demo.py (0.7 KB)
+│   ├── seed_db.py (16.0 KB)
+│   ├── stream/
+│   │   ├── app.py (3.1 KB)
+│   │   ├── processor.py (8.6 KB)
+│   │   └── topics.py (0.5 KB)
+│   ├── test_gemini_direct.py (2.2 KB)
+│   ├── test_ingest.py (0.5 KB)
+│   ├── test_login.py (0.5 KB)
+│   ├── test_login_fastapi.py (0.3 KB)
+│   ├── tests/
+│   │   ├── test_gemini.py (2.5 KB)
+│   │   └── test_intelligence.py (1.9 KB)
+├── docs/
+│   └── kafka.md (2.5 KB)
+├── package-lock.json (139.6 KB)
+├── package.json (1.0 KB)
+├── public/
+├── src/
+│   ├── App.tsx (4.1 KB)
+│   ├── components/
+│   │   ├── alerts/
+│   │   │   ├── MultilingualBroadcastCard.tsx (8.4 KB)
+│   │   │   └── PrioritizationMatrix.tsx (6.8 KB)
+│   │   ├── assistant/
+│   │   │   └── AssistantChatBox.tsx (7.5 KB)
+│   │   ├── clustering/
+│   │   │   └── ClusterDeduplicationStat.tsx (5.1 KB)
+│   │   ├── common/
+│   │   │   ├── KpiCard.tsx (1.9 KB)
+│   │   │   ├── ReportDetailModal.tsx (6.7 KB)
+│   │   │   ├── SearchModal.tsx (7.8 KB)
+│   │   │   ├── SeverityBadge.tsx (3.6 KB)
+│   │   │   ├── SubmitReportModal.tsx (16.9 KB)
+│   │   │   ├── ToastContainer.tsx (2.0 KB)
+│   │   │   └── TrustScoreGauge.tsx (6.7 KB)
+│   │   ├── fusion/
+│   │   │   ├── DataSourceStatusCard.tsx (2.2 KB)
+│   │   │   └── FusionPipelineGraphic.tsx (4.9 KB)
+│   │   ├── globe/
+│   │   │   └── WeatherGlobe3D.tsx (4.5 KB)
+│   │   ├── imageVerification/
+│   │   │   └── EvidenceAnalyzer.tsx (9.5 KB)
+│   │   ├── layout/
+│   │   │   ├── Breadcrumbs.tsx (2.8 KB)
+│   │   │   ├── HackathonDemoFlow.tsx (3.8 KB)
+│   │   │   ├── Sidebar.tsx (5.5 KB)
+│   │   │   └── TopNavbar.tsx (8.5 KB)
+│   │   ├── map/
+│   │   │   ├── IndiaWeatherMap.tsx (9.6 KB)
+│   │   │   └── RiskLegend.tsx (1.1 KB)
+│   │   ├── prediction/
+│   │   │   └── PredictionTimelineChart.tsx (4.5 KB)
+│   │   ├── truthEngine/
+│   │   │   ├── FactorBreakdown.tsx (4.1 KB)
+│   │   │   └── VerificationSimulator.tsx (6.2 KB)
+│   │   └── ui/
+│   │       └── globe.tsx (2.9 KB)
+│   ├── context/
+│   │   ├── AppContext.tsx (3.1 KB)
+│   │   └── DemoModeContext.tsx (7.1 KB)
+│   ├── data/
+│   │   ├── indiaGeoData.ts (4.9 KB)
+│   │   ├── mockAlerts.ts (12.7 KB)
+│   │   ├── mockClustering.ts (3.5 KB)
+│   │   ├── mockEvents.ts (12.8 KB)
+│   │   ├── mockFusion.ts (4.1 KB)
+│   │   ├── mockPredictions.ts (5.9 KB)
+│   │   └── mockReports.ts (12.2 KB)
+│   ├── main.tsx (0.2 KB)
+│   ├── pages/
+│   │   ├── AdminPage.tsx (9.5 KB)
+│   │   ├── AlertPrioritizationPage.tsx (3.9 KB)
+│   │   ├── AnalyticsPage.tsx (11.2 KB)
+│   │   ├── AssistantPage.tsx (0.7 KB)
+│   │   ├── DashboardPage.tsx (11.8 KB)
+│   │   ├── DataFusionPage.tsx (8.2 KB)
+│   │   ├── EventClusteringPage.tsx (4.3 KB)
+│   │   ├── EventDetailPage.tsx (9.1 KB)
+│   │   ├── ImageVerificationPage.tsx (2.5 KB)
+│   │   ├── LandingPage.tsx (6.3 KB)
+│   │   ├── LiveIntelligencePage.tsx (24.5 KB)
+│   │   ├── LoginPage.tsx (4.6 KB)
+│   │   ├── MultilingualAlertsPage.tsx (2.0 KB)
+│   │   ├── PredictionsPage.tsx (5.2 KB)
+│   │   ├── RiskHeatmapPage.tsx (4.6 KB)
+│   │   ├── TimelinePage.tsx (5.5 KB)
+│   │   ├── TruthEnginePage.tsx (10.0 KB)
+│   │   └── WeatherEventsPage.tsx (5.5 KB)
+│   ├── services/
+│   │   ├── aiApi.ts (5.7 KB)
+│   │   ├── alertApi.ts (3.8 KB)
+│   │   ├── apiClient.ts (3.9 KB)
+│   │   ├── assistantApi.ts (2.3 KB)
+│   │   ├── clusteringApi.ts (0.3 KB)
+│   │   ├── eventApi.ts (5.7 KB)
+│   │   ├── fusionApi.ts (2.0 KB)
+│   │   ├── predictionApi.ts (0.4 KB)
+│   │   ├── reportApi.ts (9.2 KB)
+│   │   └── weatherApi.ts (3.7 KB)
+│   ├── types/
+│   │   ├── alert.ts (1.0 KB)
+│   │   ├── assistant.ts (0.5 KB)
+│   │   ├── common.ts (1.0 KB)
+│   │   ├── event.ts (1.3 KB)
+│   │   ├── fusion.ts (0.7 KB)
+│   │   ├── prediction.ts (1.1 KB)
+│   │   └── report.ts (2.3 KB)
+│   └── utils/
+│       └── soundEffects.ts (3.3 KB)
+├── tsconfig.json (0.6 KB)
+├── vite.config.ts (0.6 KB)

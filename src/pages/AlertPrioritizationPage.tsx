@@ -31,7 +31,7 @@ export const AlertPrioritizationPage: React.FC = () => {
             <span>LEVEL 1: LOW</span>
             <span>Trust &lt; 70%</span>
           </div>
-          <p className="text-[11px] text-slate-300 font-sans">Automated sensor watch & telemetry pooling.</p>
+          <p className="text-[11px] text-theme-text font-sans">Automated sensor watch & telemetry pooling.</p>
           <div className="text-[10px] text-emerald-400 uppercase font-bold">Action: Monitor Grid</div>
         </div>
 
@@ -40,7 +40,7 @@ export const AlertPrioritizationPage: React.FC = () => {
             <span>LEVEL 2: MEDIUM</span>
             <span>Trust 70-84%</span>
           </div>
-          <p className="text-[11px] text-slate-300 font-sans">Municipal control room notification & pump staging.</p>
+          <p className="text-[11px] text-theme-text font-sans">Municipal control room notification & pump staging.</p>
           <div className="text-[10px] text-cyan-400 uppercase font-bold">Action: Notify Authorities</div>
         </div>
 
@@ -49,7 +49,7 @@ export const AlertPrioritizationPage: React.FC = () => {
             <span>LEVEL 3: HIGH</span>
             <span>Trust 85-92%</span>
           </div>
-          <p className="text-[11px] text-slate-300 font-sans">Public cell broadcast, SMS alerts, traffic diversions.</p>
+          <p className="text-[11px] text-theme-text font-sans">Public cell broadcast, SMS alerts, traffic diversions.</p>
           <div className="text-[10px] text-amber-400 uppercase font-bold">Action: Send Warning</div>
         </div>
 
@@ -58,20 +58,20 @@ export const AlertPrioritizationPage: React.FC = () => {
             <span>LEVEL 4: CRITICAL</span>
             <span>Trust &gt; 92%</span>
           </div>
-          <p className="text-[11px] text-slate-300 font-sans">Direct NDRF battalion dispatch & civic siren triggers.</p>
+          <p className="text-[11px] text-theme-text font-sans">Direct NDRF battalion dispatch & civic siren triggers.</p>
           <div className="text-[10px] text-red-400 uppercase font-bold">Action: Emergency Escalation</div>
         </div>
       </div>
 
       {/* Main Prioritization Queue */}
-      <div className="p-6 rounded-2xl bg-command-card border border-slate-800 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="p-6 rounded-2xl bg-theme-card border border-theme-border space-y-4">
+        <div className="flex items-center justify-between border-b border-theme-border pb-3">
           <div>
-            <h3 className="text-sm font-mono uppercase font-bold text-slate-100 flex items-center gap-2">
+            <h3 className="text-sm font-mono uppercase font-bold text-theme-text flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-red-400" />
               Active Emergency Triage Queue
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-theme-muted mt-0.5">
               Review and dispatch actions with single-click authority override.
             </p>
           </div>

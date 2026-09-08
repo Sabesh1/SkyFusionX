@@ -42,6 +42,18 @@ export default {
           text: '#EEEEF2',
           textMuted: '#9D9DAE',
         },
+        // Global Theme Variables
+        theme: {
+          bg: 'var(--theme-bg)',
+          surface: 'var(--theme-surface)',
+          card: 'var(--theme-card)',
+          border: 'var(--theme-border)',
+          'border-hover': 'var(--theme-border-hover)',
+          muted: 'var(--theme-muted)',
+          text: 'var(--theme-text)',
+          glass: 'var(--theme-glass)',
+          accent: 'var(--theme-accent)',
+        },
         intel: {
           gold: '#E5A962',
           goldDim: 'rgba(229, 169, 98, 0.15)',

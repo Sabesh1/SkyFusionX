@@ -34,6 +34,8 @@ class Observation(Base):
     # Gemini Evidence Analysis
     gemini_analyzed = Column(Boolean, default=False)         # True only if Gemini actually ran
     image_analyzed = Column(Boolean, default=False)          # True only if image was multimodal analyzed
+    image_hash = Column(String, nullable=True)               # SHA-256 hash of image bytes
+    image_analyzed_state = Column(String, default="NOT_ANALYZED") # NOT_ANALYZED | ANALYZING | ANALYZED | ANALYSIS_FAILED
     gemini_evidence_json = Column(Text, nullable=True)       # JSON: {supporting, contradicting, assessment}
     verification_assessment = Column(String, nullable=True)  # EVIDENCE_SUPPORTED | EVIDENCE_CONFLICTING | INSUFFICIENT_EVIDENCE | REQUIRES_HUMAN_REVIEW
     

@@ -28,21 +28,21 @@ export const KpiCard: React.FC<KpiCardProps> = ({
         soundFX.playClick();
         if (onClick) onClick();
       }}
-      className={`p-5 rounded-2xl bg-[#121620] border border-slate-800/80 hover:border-slate-700 transition-all shadow-sm group ${
+      className={`p-5 rounded-2xl bg-theme-card border border-theme-border/80 hover:border-theme-border-hover transition-all shadow-sm group ${
         onClick ? 'cursor-pointer' : ''
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-400 font-sans tracking-wide">
+        <span className="text-xs font-medium text-theme-muted font-sans tracking-wide">
           {title}
         </span>
-        <div className="p-2 rounded-xl bg-[#181D2A] text-slate-400 group-hover:text-cyan-400 transition-colors">
+        <div className="p-2 rounded-xl bg-theme-surface text-theme-muted group-hover:text-cyan-400 transition-colors">
           <Icon className="w-4 h-4" />
         </div>
       </div>
 
       <div className="mt-3 flex items-baseline justify-between">
-        <div className="text-2xl sm:text-3xl font-bold font-sans text-slate-100 tracking-tight">
+        <div className="text-2xl sm:text-3xl font-bold font-sans text-theme-text tracking-tight">
           {value}
         </div>
         {alertPulse && (
@@ -54,7 +54,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
       </div>
 
       {subtext && (
-        <div className="mt-1.5 text-[11px] font-mono text-slate-500 truncate">
+        <div className="mt-1.5 text-[11px] font-mono text-theme-muted truncate">
           {subtext}
         </div>
       )}

@@ -35,9 +35,9 @@ export const HackathonDemoFlow: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-3xl bg-[#0D1322]/95 border-2 border-purple-500/80 rounded-2xl shadow-[0_0_40px_rgba(168,85,247,0.3)] backdrop-blur-xl p-4 animate-fadeIn">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-3xl bg-theme-surface/95 border-2 border-purple-500/80 rounded-2xl shadow-[0_0_40px_rgba(168,85,247,0.3)] backdrop-blur-xl p-4 animate-fadeIn">
       {/* Top progress line */}
-      <div className="w-full h-1.5 bg-slate-800 rounded-full mb-3 overflow-hidden">
+      <div className="w-full h-1.5 bg-theme-card rounded-full mb-3 overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-emerald-400 transition-all duration-300"
           style={{ width: `${progressPct}%` }}
@@ -51,12 +51,12 @@ export const HackathonDemoFlow: React.FC = () => {
             <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[10px] font-mono font-bold uppercase">
               Judge Tour • Step {current.step} of {total} ({current.badge})
             </span>
-            <h4 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+            <h4 className="text-sm font-bold text-theme-text flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               {current.title}
             </h4>
           </div>
-          <p className="text-xs text-slate-300 leading-relaxed font-sans">{current.description}</p>
+          <p className="text-xs text-theme-text leading-relaxed font-sans">{current.description}</p>
           <p className="text-[11px] font-mono text-cyan-300 flex items-center gap-1 font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
             Recommended action: {current.highlightAction}
@@ -68,14 +68,14 @@ export const HackathonDemoFlow: React.FC = () => {
           <button
             onClick={handlePrev}
             disabled={currentTourStep === 0}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-2 rounded-lg bg-theme-card hover:bg-slate-700 text-theme-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
           <button
             onClick={handleNext}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs shadow-lg transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-theme-text font-bold text-xs shadow-lg transition-all"
           >
             <span>{currentTourStep === total - 1 ? 'Finish Tour' : 'Next Step'}</span>
             <ChevronRight className="w-4 h-4" />
@@ -83,7 +83,7 @@ export const HackathonDemoFlow: React.FC = () => {
 
           <button
             onClick={endTour}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors"
+            className="p-2 rounded-lg text-theme-muted hover:text-theme-text hover:bg-theme-card/80 transition-colors"
             title="Close Tour"
           >
             <X className="w-4 h-4" />

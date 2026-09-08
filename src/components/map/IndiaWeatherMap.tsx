@@ -25,14 +25,21 @@ interface IndiaWeatherMapProps {
   zoomLevel?: number;
   center?: [number, number];
   showClusters?: boolean;
+  selectedStateBounds?: [[number, number], [number, number]];
 }
 
 // Custom map view controller for smooth panning
-const MapController: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
+const MapController: React.FC<{ center: [number, number]; zoom: number; bounds?: [[number, number], [number, number]] }> = ({ center, zoom, bounds }) => {
   const map = useMap();
   useEffect(() => {
+    if (bounds) {
+      const [southWest, northEast] = bounds;
+      const targetBounds = L.latLngBounds([southWest[0], southWest[1]], [northEast[0], northEast[1]]);
+      map.fitBounds(targetBounds, { padding: [30, 30], animate: true });
+      return;
+    }
     map.setView(center, zoom, { animate: true });
-  }, [center, zoom, map]);
+  }, [center, zoom, bounds, map]);
   return null;
 };
 
@@ -48,12 +55,12 @@ const createCustomMarkerIcon = (severity: SeverityLevel, trustScore: number, nam
   const c = colorMap[severity] || colorMap.MODERATE;
 
   const html = `
-    <div class="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group">
+    <div class="relative w-full h-full flex items-center justify-center cursor-pointer group">
       <div class="absolute w-9 h-9 rounded-full border ${c.ring} opacity-75 animate-ping"></div>
       <div class="absolute w-7 h-7 rounded-full border ${c.ring} opacity-40"></div>
       <div class="w-4 h-4 rounded-full ${c.dot}" style="box-shadow: 0 0 14px ${c.shadow};">
       </div>
-      <div class="absolute top-5 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-full bg-[#181822]/95 border border-[#2B2B3C] text-[10px] font-mono text-slate-200 pointer-events-none shadow-card-emboss backdrop-blur-md">
+      <div class="absolute top-5 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-full bg-theme-surface/95 border border-theme-border/80 text-[10px] font-mono text-theme-text pointer-events-none shadow-card-emboss backdrop-blur-md">
         ${name.split(' ')[0]} <span class="text-[#E5A962] font-bold">${trustScore}%</span>
       </div>
     </div>
@@ -75,6 +82,7 @@ export const IndiaWeatherMap: React.FC<IndiaWeatherMapProps> = ({
   zoomLevel = 5,
   center = [20.5937, 78.9629], // Center of India
   showClusters = true,
+  selectedStateBounds,
 }) => {
   const navigate = useNavigate();
   const [layerRadar, setLayerRadar] = useState(true);
@@ -82,14 +90,14 @@ export const IndiaWeatherMap: React.FC<IndiaWeatherMapProps> = ({
   const [showLayerMenu, setShowLayerMenu] = useState(false);
 
   return (
-    <div className="relative w-full rounded-3xl overflow-hidden border border-[#2B2B3C] bg-[#121217] shadow-card-emboss">
+    <div className="relative w-full rounded-3xl overflow-hidden border border-theme-border/80 bg-theme-bg shadow-card-emboss">
       <MapContainer
         center={center}
         zoom={zoomLevel}
         style={{ height, width: '100%', background: '#121217' }}
         zoomControl={false}
       >
-        <MapController center={center} zoom={zoomLevel} />
+        <MapController center={center} zoom={zoomLevel} bounds={selectedStateBounds} />
 
         {/* High Contrast Dark Carto Tiles */}
         <TileLayer
@@ -138,7 +146,7 @@ export const IndiaWeatherMap: React.FC<IndiaWeatherMapProps> = ({
                   }}
                 >
                   <Popup className="custom-dark-popup">
-                    <div className="p-4 bg-[#181822] border border-[#E5A962]/40 rounded-2xl text-slate-100 font-sans shadow-2xl min-w-[250px]">
+                    <div className="p-4 bg-theme-surface border border-[#E5A962]/40 rounded-2xl text-theme-text font-sans shadow-2xl min-w-[250px]">
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <SeverityBadge severity={event.severity} size="sm" />
                         <span className="text-[10px] font-mono text-[#E5A962] font-bold px-2 py-0.5 rounded-full bg-[#2A2218] border border-[#E5A962]/30">
@@ -147,14 +155,14 @@ export const IndiaWeatherMap: React.FC<IndiaWeatherMapProps> = ({
                       </div>
 
                       <h4 className="text-xs font-bold text-[#F3D9B5]">{event.eventName}</h4>
-                      <p className="text-[11px] text-slate-400 mt-1">{event.location}</p>
+                      <p className="text-[11px] text-theme-muted mt-1">{event.location}</p>
 
-                      <div className="grid grid-cols-2 gap-2 my-2.5 py-1.5 border-y border-[#2B2B3C] font-mono text-[10px] text-slate-300">
+                      <div className="grid grid-cols-2 gap-2 my-2.5 py-1.5 border-y border-theme-border/80 font-mono text-[10px] text-theme-text">
                         <div>
                           Reports: <span className="text-[#E5A962] font-bold">{event.totalReports}</span>
                         </div>
                         <div>
-                          Radius: <span className="text-slate-200 font-bold">{event.clusterRadiusKm} km</span>
+                          Radius: <span className="text-theme-text font-bold">{event.clusterRadiusKm} km</span>
                         </div>
                       </div>
 
@@ -177,7 +185,7 @@ export const IndiaWeatherMap: React.FC<IndiaWeatherMapProps> = ({
       </MapContainer>
 
       {/* Grid Overlay Header Badge */}
-      <div className="absolute top-4 left-4 z-[400] flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#181822]/90 border border-[#2B2B3C] backdrop-blur-md shadow-card-emboss">
+      <div className="absolute top-4 left-4 z-[400] flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-theme-surface/90 border border-theme-border/80 backdrop-blur-md shadow-card-emboss">
         <span className="w-2 h-2 rounded-full bg-[#E5A962] animate-ping" />
         <span className="text-xs font-mono font-bold text-[#F3D9B5]">
           SURVEILLANCE RADAR
@@ -191,18 +199,18 @@ export const IndiaWeatherMap: React.FC<IndiaWeatherMapProps> = ({
       <div className="absolute top-4 right-4 z-[400]">
         <button
           onClick={() => setShowLayerMenu(!showLayerMenu)}
-          className="p-2.5 px-3 rounded-full bg-[#181822]/90 border border-[#2B2B3C] hover:border-[#E5A962]/50 text-slate-300 backdrop-blur-md flex items-center gap-1.5 text-xs font-mono transition-colors shadow-card-emboss"
+          className="p-2.5 px-3 rounded-full bg-theme-surface/90 border border-theme-border/80 hover:border-[#E5A962]/50 text-theme-text backdrop-blur-md flex items-center gap-1.5 text-xs font-mono transition-colors shadow-card-emboss"
         >
           <Layers className="w-4 h-4 text-[#E5A962]" />
           <span className="hidden sm:inline font-semibold">Layers</span>
         </button>
 
         {showLayerMenu && (
-          <div className="absolute right-0 mt-2 w-52 p-3.5 bg-[#181822] border border-[#E5A962]/40 rounded-2xl shadow-2xl text-xs font-mono space-y-2.5 animate-fadeIn backdrop-blur-xl">
-            <div className="text-[10px] text-slate-400 uppercase font-bold border-b border-[#2B2B3C] pb-1.5">
+          <div className="absolute right-0 mt-2 w-52 p-3.5 bg-theme-surface border border-[#E5A962]/40 rounded-2xl shadow-2xl text-xs font-mono space-y-2.5 animate-fadeIn backdrop-blur-xl">
+            <div className="text-[10px] text-theme-muted uppercase font-bold border-b border-theme-border/80 pb-1.5">
               Surveillance Overlays
             </div>
-            <label className="flex items-center justify-between cursor-pointer text-slate-200 hover:text-[#E5A962]">
+            <label className="flex items-center justify-between cursor-pointer text-theme-text hover:text-[#E5A962]">
               <span>Radar Signal Pins</span>
               <input
                 type="checkbox"
@@ -211,7 +219,7 @@ export const IndiaWeatherMap: React.FC<IndiaWeatherMapProps> = ({
                 className="accent-[#E5A962]"
               />
             </label>
-            <label className="flex items-center justify-between cursor-pointer text-slate-200 hover:text-[#E5A962]">
+            <label className="flex items-center justify-between cursor-pointer text-theme-text hover:text-[#E5A962]">
               <span>Risk Bounding Radii</span>
               <input
                 type="checkbox"

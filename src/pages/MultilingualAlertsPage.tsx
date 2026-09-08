@@ -28,7 +28,7 @@ export const MultilingualAlertsPage: React.FC = () => {
       <div className="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-cyan-400" />
-          <span className="text-slate-200">Supported Languages:</span>
+          <span className="text-theme-text">Supported Languages:</span>
           <span className="text-cyan-300 font-bold">
             English • हिन्दी (Hindi) • தமிழ் (Tamil) • తెలుగు (Telugu) • ಕನ್ನಡ (Kannada) • മലയാളം (Malayalam) • বাংলা (Bengali) • मराठी (Marathi)
           </span>

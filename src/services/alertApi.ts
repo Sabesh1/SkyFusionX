@@ -1,4 +1,3 @@
-import { MOCK_ALERTS } from '../data/mockAlerts';
 import { WeatherAlert, AlertActionLevel, MultilingualMessage } from '../types/alert';
 import { SeverityLevel } from '../types/common';
 import { apiClient } from './apiClient';
@@ -31,13 +30,7 @@ export const alertApi = {
 
         const multiMsg: MultilingualMessage = {
           en: ba.message,
-          hi: `${ba.title}: कृपया सुरक्षित स्थान पर रहें।`,
-          ta: `${ba.title}: பாதுகாப்பான இடங்களில் இருக்கவும்.`,
-          te: `${ba.title}: దయచేసి సురక్షిత ప్రాంతాలకు వెళ్లండి.`,
-          kn: `${ba.title}: ದಯವಿಟ್ಟು ಸುರಕ್ಷಿತವಾಗಿರಿ.`,
-          ml: `${ba.title}: സുരക്ഷിതമായി തുടരുക.`,
-          bn: `${ba.title}: অনুগ্রহ করে নিরাপদ স্থানে থাকুন।`,
-          mr: `${ba.title}: कृपया सुरक्षित ठिकाणी राहा.`,
+          // Let UI handle dynamic fetching and caching instead of hardcoded strings
         };
 
         return {
@@ -62,42 +55,28 @@ export const alertApi = {
       });
     }
 
-    // 2. Fallback to mock alerts
-    let alerts = [...MOCK_ALERTS];
-    if (filter?.severity && filter.severity !== 'ALL') {
-      alerts = alerts.filter(a => a.severity === filter.severity);
-    }
-    if (filter?.status && filter.status !== 'ALL') {
-      alerts = alerts.filter(a => a.status === filter.status);
-    }
-    return alerts;
+    return [];
   },
 
   async acknowledgeAlert(id: string): Promise<WeatherAlert | null> {
-    const alert = MOCK_ALERTS.find(a => a.id === id);
-    if (alert) {
-      alert.status = 'ACKNOWLEDGED';
-      return { ...alert };
-    }
     return null;
   },
 
   async escalateAlert(id: string): Promise<WeatherAlert | null> {
-    const alert = MOCK_ALERTS.find(a => a.id === id);
-    if (alert) {
-      alert.status = 'ESCALATED';
-      alert.actionLevel = 'CRITICAL_ESCALATION';
-      return { ...alert };
-    }
     return null;
   },
 
   async dismissAlert(id: string): Promise<WeatherAlert | null> {
-    const alert = MOCK_ALERTS.find(a => a.id === id);
-    if (alert) {
-      alert.status = 'DISMISSED';
-      return { ...alert };
-    }
     return null;
+  },
+
+  async translateAlert(id: string, language: string): Promise<{ translated_text: string, error?: string } | null> {
+    try {
+      const result = await apiClient.post<{ translated_text: string, error?: string }>(`/api/v1/alerts/${id}/translate`, { language });
+      return result;
+    } catch (e) {
+      console.error('Translation failed', e);
+      return null;
+    }
   }
 };

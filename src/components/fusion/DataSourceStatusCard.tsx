@@ -15,15 +15,15 @@ export const DataSourceStatusCard: React.FC<{ source: DataSourceHealth }> = ({ s
   const Icon = iconMap[source.type] || Radio;
 
   return (
-    <div className="p-4 rounded-xl bg-command-card border border-slate-800 hover:border-slate-700 transition-all space-y-3">
+    <div className="p-4 rounded-xl bg-theme-card border border-theme-border hover:border-theme-border-hover transition-all space-y-3">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-cyan-400">
+          <div className="p-2 rounded-lg bg-theme-surface border border-theme-border text-cyan-400">
             <Icon className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-slate-100">{source.name}</h4>
-            <span className="text-[10px] font-mono text-slate-400">{source.activeNodes}</span>
+            <h4 className="text-xs font-bold text-theme-text">{source.name}</h4>
+            <span className="text-[10px] font-mono text-theme-muted">{source.activeNodes}</span>
           </div>
         </div>
 
@@ -33,11 +33,11 @@ export const DataSourceStatusCard: React.FC<{ source: DataSourceHealth }> = ({ s
         </span>
       </div>
 
-      <p className="text-[11px] text-slate-400 leading-relaxed font-sans">{source.description}</p>
+      <p className="text-[11px] text-theme-muted leading-relaxed font-sans">{source.description}</p>
 
-      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-400">
+      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-theme-border/80 text-[10px] font-mono text-theme-muted">
         <div>
-          Throughput: <span className="text-slate-200 font-semibold">{source.throughputRate}</span>
+          Throughput: <span className="text-theme-text font-semibold">{source.throughputRate}</span>
         </div>
         <div>
           Reliability: <span className="text-emerald-400 font-semibold">{source.reliabilityScore}%</span>
@@ -46,7 +46,7 @@ export const DataSourceStatusCard: React.FC<{ source: DataSourceHealth }> = ({ s
           Latency: <span className="text-cyan-400 font-semibold">{source.latencyMs} ms</span>
         </div>
         <div>
-          Latest Sync: <span className="text-slate-300">{source.latestSyncTime}</span>
+          Latest Sync: <span className="text-theme-text">{source.latestSyncTime}</span>
         </div>
       </div>
     </div>

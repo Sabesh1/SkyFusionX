@@ -31,12 +31,12 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ title, description, ac
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2 border-b border-[#252534] pb-4 select-none">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2 border-b border-theme-border pb-4 select-none">
       <div className="space-y-1">
         {/* Navigation Breadcrumb Trail */}
-        <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400">
-          <Link to="/dashboard" className="hover:text-[#E5A962] transition-colors flex items-center gap-1">
-            <Home className="w-3.5 h-3.5 text-[#E5A962]" />
+        <div className="flex items-center gap-1.5 text-xs font-mono text-theme-muted">
+          <Link to="/dashboard" className="hover:text-theme-accent transition-colors flex items-center gap-1">
+            <Home className="w-3.5 h-3.5 text-theme-accent" />
             <span>Command Center</span>
           </Link>
 
@@ -47,11 +47,11 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ title, description, ac
 
             return (
               <React.Fragment key={routeTo}>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+                <ChevronRight className="w-3.5 h-3.5 text-theme-muted" />
                 {isLast ? (
-                  <span className="text-[#E5A962] font-semibold">{displayName}</span>
+                  <span className="text-theme-accent font-semibold">{displayName}</span>
                 ) : (
-                  <Link to={routeTo} className="hover:text-[#E5A962] transition-colors">
+                  <Link to={routeTo} className="hover:text-theme-accent transition-colors">
                     {displayName}
                   </Link>
                 )}
@@ -62,12 +62,12 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ title, description, ac
 
         {/* Page Title & Subtitle */}
         {title && (
-          <h1 className="text-xl md:text-2xl font-bold font-display tracking-tight text-[#EEEEF2]">
+          <h1 className="text-xl md:text-2xl font-bold font-display tracking-tight text-theme-text">
             {title}
           </h1>
         )}
         {description && (
-          <p className="text-xs md:text-sm text-slate-400 font-sans max-w-3xl leading-relaxed">
+          <p className="text-xs md:text-sm text-theme-muted font-sans max-w-3xl leading-relaxed">
             {description}
           </p>
         )}

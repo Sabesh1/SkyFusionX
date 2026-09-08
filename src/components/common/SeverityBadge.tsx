@@ -93,7 +93,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' })
       label: 'Rejected',
     },
     UNVERIFIED: {
-      bg: 'bg-slate-900/50 text-slate-400 border-slate-700/50',
+      bg: 'bg-theme-surface/50 text-theme-muted border-theme-border-hover/50',
       icon: Clock,
       label: 'Unverified',
     },

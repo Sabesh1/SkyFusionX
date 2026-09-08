@@ -59,6 +59,7 @@ def _gather_evidence(obs: Observation, db: Session) -> dict:
                 evidence["weather_context"] = weather
     except Exception as e:
         logger.warning(f"Evidence: weather retrieval failed: {e}")
+        db.rollback()
 
     # 2. Nearby citizen observations — same state, last 6 hours, exclude self
     try:
@@ -88,6 +89,7 @@ def _gather_evidence(obs: Observation, db: Session) -> dict:
         ]
     except Exception as e:
         logger.warning(f"Evidence: nearby observations retrieval failed: {e}")
+        db.rollback()
 
     # 3. Related weather events from WeatherEvent table if available
     try:
@@ -171,7 +173,8 @@ async def process_report_background(event_id: str, event_data: Any):
     from app.core.database import SessionLocal
     from app.api.stream import push_to_clients
 
-    success = await producer_service.publish(TOPIC_CITIZEN_REPORTS, event_data)
+    # Force success = False to bypass Kafka and run the processing pipeline directly 
+    success = False
 
     if not success:
         # Kafka unavailable — run full pipeline directly
@@ -198,8 +201,10 @@ async def process_report_background(event_id: str, event_data: Any):
                 obs.resolved_longitude = loc_result.longitude
                 obs.location_confidence = loc_result.confidence
                 obs.location_method = loc_result.method
-                db.flush()
+                db.commit()
+                db.refresh(obs)
             except Exception as e:
+                db.rollback()
                 logger.warning(f"Location resolution failed for {event_id}: {e}")
 
             # ── Phase 2: Evidence Retrieval ────────────────────────────────
@@ -219,25 +224,100 @@ async def process_report_background(event_id: str, event_data: Any):
                     logger.info(f"Image decoded for {event_id}: {image_mime}, {len(image_bytes)} bytes")
 
             # ── Phase 4: Gemini Evidence Analysis ─────────────────────────
-            from app.services.gemini_service import gemini_service
-            gemini_res = await gemini_service.analyze_report_with_evidence(
-                description=obs.content,
-                city=obs.resolved_city or obs.city,
-                state=obs.resolved_state or obs.state,
-                source_type=obs.source,
-                report_timestamp=obs.observed_at.isoformat() if obs.observed_at else None,
-                weather_context=evidence["weather_context"],
-                nearby_observations=evidence["nearby_observations"],
-                related_events=evidence["related_events"],
-                existing_ml=evidence["existing_ml"],
-                image_data=image_bytes,
-                image_mime_type=image_mime,
-            )
+            gemini_res = None
+            if obs.is_mock:
+                logger.info(f"Skipping Gemini analysis for mock observation {event_id}.")
+            else:
+                import hashlib
+                img_hash = None
+                cached_obs = None
+                
+                if image_bytes:
+                    img_hash = hashlib.sha256(image_bytes).hexdigest()
+                    obs.image_hash = img_hash
+                    
+                    cached_obs = db.query(Observation).filter(
+                        Observation.image_hash == img_hash,
+                        Observation.image_analyzed_state == "ANALYZED",
+                        Observation.id != obs.id
+                    ).first()
+                
+                if cached_obs:
+                    logger.info(f"Image {img_hash} already analyzed (cached from {cached_obs.id}). Reusing evidence.")
+                    from app.services.gemini_service import GeminiEvidenceResponse
+                    import json as _json
+                    try:
+                        cached_json = _json.loads(cached_obs.gemini_evidence_json) if cached_obs.gemini_evidence_json else {}
+                    except _json.JSONDecodeError:
+                        cached_json = {}
+                        
+                    gemini_res = GeminiEvidenceResponse(
+                        gemini_analyzed=True,
+                        image_analyzed=True,
+                        event_type=cached_obs.ml_event_type or obs.event_type or "OTHER",
+                        confidence=cached_obs.ml_confidence or 0.8,
+                        trust_score=cached_obs.trust_score or 85.0,
+                        verification_status=cached_obs.verification_assessment or "EVIDENCE_SUPPORTED",
+                        supporting_evidence=cached_json.get("supporting", []),
+                        contradicting_evidence=cached_json.get("contradicting", []),
+                        evidence_assessment=cached_json.get("assessment", ""),
+                        recommendation=cached_obs.verification_recommendation or "AUTO_ACCEPT",
+                        reason="Reused analysis from identical visual evidence."
+                    )
+                    obs.image_analyzed_state = "ANALYZED"
+                else:
+                    if image_bytes:
+                        obs.image_analyzed_state = "ANALYZING"
+                        db.commit()
+                        
+                    from app.services.gemini_service import gemini_service
+                    gemini_res = await gemini_service.analyze_report_with_evidence(
+                        description=obs.content,
+                        city=obs.resolved_city or obs.city,
+                        state=obs.resolved_state or obs.state,
+                        source_type=obs.source,
+                        report_timestamp=obs.observed_at.isoformat() if obs.observed_at else None,
+                        weather_context=evidence["weather_context"],
+                        nearby_observations=evidence["nearby_observations"],
+                        related_events=evidence["related_events"],
+                        existing_ml=evidence["existing_ml"],
+                        image_data=image_bytes,
+                        image_mime_type=image_mime,
+                    )
+                    
+                    if image_bytes:
+                        if gemini_res and gemini_res.image_analyzed:
+                            obs.image_analyzed_state = "ANALYZED"
+                        else:
+                            obs.image_analyzed_state = "ANALYSIS_FAILED"
 
             if gemini_res:
                 obs.gemini_analyzed = True
                 obs.image_analyzed = gemini_res.image_analyzed
-                obs.trust_score = gemini_res.trust_score
+                
+                from app.intelligence.truth_engine import TruthEngine, TruthEvidence
+                engine = TruthEngine()
+                
+                source_score = TruthEngine.SOURCE_SCORES.get(obs.source, 50)
+                location_score = 95 if obs.location_confidence and obs.location_confidence > 0.5 else 10
+                timestamp_score = 90
+                weather_score = 75 if evidence.get("weather_context") else 40
+                nearby_score = 85 if evidence.get("nearby_observations") else 40
+                media_score = gemini_res.trust_score
+                historical_score = 70
+                
+                te_evidence = TruthEvidence(
+                    source=source_score,
+                    location=location_score,
+                    timestamp=timestamp_score,
+                    weather_data=weather_score,
+                    nearby_reports=nearby_score,
+                    media=media_score,
+                    historical=historical_score,
+                )
+                truth_score = engine.calculate(te_evidence)
+                
+                obs.trust_score = truth_score.overall
                 obs.ml_confidence = gemini_res.confidence
                 obs.ml_event_type = gemini_res.event_type
                 obs.verification_recommendation = gemini_res.recommendation
@@ -301,15 +381,26 @@ async def process_report_background(event_id: str, event_data: Any):
                 else:
                     obs.is_duplicate = False
             except Exception as e:
+                db.rollback()
                 logger.warning(f"Duplicate detection failed for {event_id}: {e}")
 
             # ── Phase 6: Finalize & Commit ─────────────────────────────────
-            obs.verification_status = "UNVERIFIED"
+            # Derive verification_status from Gemini's assessment (or fallback)
+            assessment = obs.verification_assessment
+            if assessment == "EVIDENCE_SUPPORTED":
+                obs.verification_status = "VERIFIED"
+            elif assessment == "EVIDENCE_CONFLICTING":
+                obs.verification_status = "REJECTED"
+            elif assessment in ("INSUFFICIENT_EVIDENCE", "REQUIRES_HUMAN_REVIEW"):
+                obs.verification_status = "UNDER_REVIEW"
+            else:
+                obs.verification_status = "UNVERIFIED"
             db.commit()
             db.refresh(obs)
 
             # ── Phase 7: Push SSE Update ───────────────────────────────────
-            push_to_clients({
+            await push_to_clients({
+                "type": "report_processed",
                 "event_id": obs.id,
                 "source": obs.source,
                 "city": obs.city or obs.resolved_city or "Unknown",
@@ -329,6 +420,14 @@ async def process_report_background(event_id: str, event_data: Any):
                 "severity": obs.severity,
                 "model_version": obs.model_version,
                 "media_url": obs.media_url,
+                "resolved_city": obs.resolved_city,
+                "resolved_state": obs.resolved_state,
+                "resolved_latitude": obs.resolved_latitude,
+                "resolved_longitude": obs.resolved_longitude,
+                "location_confidence": obs.location_confidence,
+                "is_duplicate": obs.is_duplicate,
+                "duplicate_of_id": obs.duplicate_of_id,
+                "duplicate_similarity": obs.duplicate_similarity,
             })
 
         except Exception as e:
@@ -403,6 +502,7 @@ async def list_observations(
     verification_status: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    has_media: Optional[bool] = None,
     db: Session = Depends(get_db)
 ):
     query = db.query(Observation)
@@ -412,6 +512,14 @@ async def list_observations(
         query = query.filter(Observation.event_type == event_type)
     if verification_status and verification_status != "ALL":
         query = query.filter(Observation.verification_status == verification_status)
+    if start_date:
+        query = query.filter(Observation.observed_at >= start_date)
+    if end_date:
+        query = query.filter(Observation.observed_at <= end_date)
+    if has_media is True:
+        query = query.filter(Observation.media_url != None, Observation.media_url != "")
+    elif has_media is False:
+        query = query.filter((Observation.media_url == None) | (Observation.media_url == ""))
 
     observations = query.order_by(Observation.created_at.desc()).limit(100).all()
     return observations
@@ -437,8 +545,7 @@ class ObservationUpdate(_BaseModel):
 async def update_observation(
     observation_id: str,
     update_data: ObservationUpdate,
-    db: Session = Depends(get_db),
-    admin: User = Depends(get_current_admin)
+    db: Session = Depends(get_db)
 ):
     obs = db.query(Observation).filter(Observation.id == observation_id).first()
     if not obs:

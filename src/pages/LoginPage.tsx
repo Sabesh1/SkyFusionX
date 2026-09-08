@@ -54,8 +54,8 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0E0E12] text-[#EEEEF2] flex items-center justify-center p-4 selection:bg-[#E5A962] selection:text-slate-950">
-      <div className="w-full max-w-md p-8 rounded-3xl bg-gradient-to-b from-[#1C1C24] to-[#121217] border border-[#2B2B3C] shadow-card-emboss space-y-6">
+    <div className="min-h-screen bg-theme-bg text-theme-text flex items-center justify-center p-4 selection:bg-[#E5A962] selection:text-slate-950">
+      <div className="w-full max-w-md p-8 rounded-3xl bg-theme-card border border-theme-border shadow-card-emboss space-y-6">
         <div className="text-center space-y-3">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E5A962] via-[#D49547] to-[#8C5E28] flex items-center justify-center text-slate-950 mx-auto shadow-gold-glow">
             <ShieldCheck className="w-8 h-8 stroke-[2.5]" />
@@ -72,29 +72,29 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleLogin} className="space-y-4 font-mono text-xs">
           <div className="space-y-1.5">
-            <label className="text-slate-400">Officer / Station ID</label>
+            <label className="text-theme-muted">Officer / Station ID</label>
             <div className="relative">
-              <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+              <User className="w-4 h-4 text-theme-muted absolute left-3.5 top-3" />
               <input
                 type="text"
                 required
                 value={operatorId}
                 onChange={e => setOperatorId(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-[#181822] border border-[#2B2B3C] focus:border-[#E5A962] text-slate-200 outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-theme-surface border border-theme-border focus:border-[#E5A962] text-theme-text outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-slate-400">Security Passcode</label>
+            <label className="text-theme-muted">Security Passcode</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+              <Lock className="w-4 h-4 text-theme-muted absolute left-3.5 top-3" />
               <input
                 type="password"
                 required
                 value={passcode}
                 onChange={e => setPasscode(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-[#181822] border border-[#2B2B3C] focus:border-[#E5A962] text-slate-200 outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-theme-surface border border-theme-border focus:border-[#E5A962] text-theme-text outline-none transition-colors"
               />
             </div>
           </div>

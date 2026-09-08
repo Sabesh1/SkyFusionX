@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models.weather_event import WeatherEvent
+from app.models.observation import Observation
 from app.services.location_service import resolve_location, get_latest_weather, fetch_and_store_weather
 
 router = APIRouter()
@@ -60,6 +61,8 @@ def extract_intent(query: str) -> str:
         return "RECOMMENDED_ACTIONS"
     if any(w in q for w in ["lowest trust", "fake", "suspicious", "misinformation", "rejected"]):
         return "LOW_TRUST_REPORTS"
+    if any(w in q for w in ["report", "observation", "submitted", "citizen", "rainfall report", "flood report", "recent report", "new report", "latest report"]):
+        return "RECENT_REPORTS"
     return "CURRENT_STATUS"
 
 
@@ -127,12 +130,59 @@ def get_national_summary(db: Session) -> Dict[str, Any]:
     events = db.query(WeatherEvent).all()
     critical = [e for e in events if e.risk_level == "CRITICAL"]
     high = [e for e in events if e.risk_level == "HIGH"]
+    
+    observations = db.query(Observation).all()
+    suspicious = [o for o in observations if o.verification_status == "REJECTED" or o.trust_score and o.trust_score < 50]
+    verified = [o for o in observations if o.verification_status == "VERIFIED"]
+    
+    # Event type distribution for observations
+    event_counts = {}
+    for o in observations:
+        evt = o.event_type or "OTHER"
+        event_counts[evt] = event_counts.get(evt, 0) + 1
+        
+    top_event_type = max(event_counts.items(), key=lambda x: x[1])[0] if event_counts else "None"
+    
     return {
         "total_events": len(events),
         "critical_count": len(critical),
         "high_count": len(high),
         "top_event": events[0] if events else None,
+        "total_reports": len(observations),
+        "suspicious_reports": len(suspicious),
+        "verified_reports": len(verified),
+        "top_report_event_type": top_event_type
     }
+
+
+def _get_recent_observations(db: Session, state: str = None, city: str = None, limit: int = 10) -> List[Dict[str, Any]]:
+    """Fetch recent observations from the database, optionally filtered by state/city."""
+    # Relax filters for demo mode to ensure data is always retrieved
+    q = db.query(Observation)
+    if state:
+        q = q.filter(
+            (Observation.state == state) | (Observation.resolved_state == state)
+        )
+    if city:
+        q = q.filter(
+            (Observation.city == city) | (Observation.resolved_city == city)
+        )
+    obs_list = q.order_by(Observation.observed_at.desc()).limit(limit).all()
+    results = []
+    for o in obs_list:
+        results.append({
+            "id": o.id,
+            "source": o.source,
+            "event_type": o.ml_event_type or o.event_type or "OTHER",
+            "content": (o.content or "")[:200],
+            "city": o.resolved_city or o.city or "Unknown",
+            "state": o.resolved_state or o.state or "Unknown",
+            "trust_score": o.trust_score,
+            "verification_status": o.verification_status,
+            "observed_at": o.observed_at.isoformat() if o.observed_at else "Unknown",
+            "gemini_analyzed": o.gemini_analyzed,
+        })
+    return results
 
 
 # ─── Endpoint ──────────────────────────────────────────────────────────────────
@@ -160,10 +210,28 @@ async def copilot_chat(request: ChatRequest, db: Session = Depends(get_db)):
             "**National Weather Overview (India):**\n",
             f"• {nat['total_events']} weather events in application database.",
             f"• {nat['critical_count']} CRITICAL and {nat['high_count']} HIGH severity incidents.",
+            f"• {nat['total_reports']} total citizen reports in the database.",
+            f"• {nat['verified_reports']} verified reports.",
+            f"• {nat['suspicious_reports']} suspicious or rejected reports.",
+            f"• Most reported event type: {nat['top_report_event_type']}.",
         ]
         if nat["top_event"]:
             e = nat["top_event"]
-            lines.append(f"• Highest priority: {e.title or e.event_type} (Risk: {e.risk_score})")
+            lines.append(f"• Highest priority event: {e.title or e.event_type} (Risk: {e.risk_score})")
+
+        # Also include recent observations for national context
+        recent_obs = _get_recent_observations(db, limit=10)
+        if recent_obs:
+            lines.append(f"\n**Recent Citizen Reports ({len(recent_obs)} in last 6 hours):**")
+            for i, ro in enumerate(recent_obs[:5], 1):
+                lines.append(
+                    f"  [{i}] {ro['event_type']} in {ro['city']}, {ro['state']} | "
+                    f"Trust: {ro['trust_score'] or 'N/A'}% | Status: {ro['verification_status']} | "
+                    f"Time: {ro['observed_at'][:16]} | Report: {ro['content'][:100]}"
+                )
+        else:
+            lines.append("\nNo recent citizen reports in the last 6 hours.")
+
         full_context = "\n".join(lines)
         
         from app.services.gemini_service import gemini_service
@@ -226,6 +294,10 @@ async def copilot_chat(request: ChatRequest, db: Session = Depends(get_db)):
         ]
         logger.info(f"[Copilot] App events near {loc_name}: {len(loc_events)}")
 
+        # STEP 3b — Fetch recent citizen observations near this location
+        recent_obs = _get_recent_observations(db, state=loc_state, city=loc_name, limit=10)
+        logger.info(f"[Copilot] Recent observations near {loc_name}: {len(recent_obs)}")
+
         # STEP 4 — Synthesize response
         part = f"**Weather Intelligence for {loc_name}, {loc_state}:**\n\n"
 
@@ -266,6 +338,20 @@ async def copilot_chat(request: ChatRequest, db: Session = Depends(get_db)):
             part += f"⚠️ No specific application event for {loc_name}, but real-world conditions indicate **{weather['severity']}** weather. Exercise caution.\n"
         else:
             part += f"✅ No active weather events are currently recorded in the application database for {loc_name}.\n"
+
+        # STEP 5 — Include recent citizen observations
+        if recent_obs:
+            part += f"\n📝 **Recent Citizen Reports ({len(recent_obs)}):**\n"
+            for i, ro in enumerate(recent_obs[:5], 1):
+                part += (
+                    f"  [{i}] **{ro['event_type']}** | Trust: {ro['trust_score'] or 'N/A'}% | "
+                    f"Status: {ro['verification_status']} | "
+                    f"Time: {ro['observed_at'][:16].replace('T', ' ')} | "
+                    f"Report: {ro['content'][:100]}\n"
+                )
+            chips.append(SourceChip(name=f"{len(recent_obs)} Citizen Reports", type="citizen"))
+        elif intent == "RECENT_REPORTS":
+            part += f"\nℹ️ No recent citizen reports found near {loc_name} in the last 6 hours.\n"
 
         response_parts.append(part)
 

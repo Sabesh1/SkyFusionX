@@ -4,6 +4,7 @@ export interface IndianStateRisk {
   code: string;
   name: string;
   center: GeoCoordinate;
+  bounds?: [[number, number], [number, number]];
   riskLevel: SeverityLevel;
   activeEventsCount: number;
   totalReports: number;
@@ -19,6 +20,7 @@ export const INDIAN_STATES_DATA: Record<string, IndianStateRisk> = {
     code: 'TN',
     name: 'Tamil Nadu',
     center: { lat: 13.0827, lng: 80.2707 },
+    bounds: [[8.1, 76.2], [13.9, 80.4]],
     riskLevel: 'CRITICAL',
     activeEventsCount: 8,
     totalReports: 3420,
@@ -32,6 +34,7 @@ export const INDIAN_STATES_DATA: Record<string, IndianStateRisk> = {
     code: 'TS',
     name: 'Telangana',
     center: { lat: 17.3850, lng: 78.4867 },
+    bounds: [[15.8, 77.2], [19.8, 81.2]],
     riskLevel: 'HIGH',
     activeEventsCount: 5,
     totalReports: 1890,
@@ -45,6 +48,7 @@ export const INDIAN_STATES_DATA: Record<string, IndianStateRisk> = {
     code: 'KA',
     name: 'Karnataka',
     center: { lat: 12.9716, lng: 77.5946 },
+    bounds: [[11.3, 74.1], [18.5, 78.7]],
     riskLevel: 'MODERATE',
     activeEventsCount: 4,
     totalReports: 1420,
@@ -58,6 +62,7 @@ export const INDIAN_STATES_DATA: Record<string, IndianStateRisk> = {
     code: 'MH',
     name: 'Maharashtra',
     center: { lat: 19.0760, lng: 72.8777 },
+    bounds: [[15.6, 72.0], [22.0, 80.9]],
     riskLevel: 'HIGH',
     activeEventsCount: 6,
     totalReports: 2450,
@@ -71,6 +76,7 @@ export const INDIAN_STATES_DATA: Record<string, IndianStateRisk> = {
     code: 'KL',
     name: 'Kerala',
     center: { lat: 9.9312, lng: 76.2673 },
+    bounds: [[8.1, 74.8], [12.9, 77.6]],
     riskLevel: 'HIGH',
     activeEventsCount: 4,
     totalReports: 1120,
@@ -84,6 +90,7 @@ export const INDIAN_STATES_DATA: Record<string, IndianStateRisk> = {
     code: 'DL',
     name: 'Delhi NCR',
     center: { lat: 28.6139, lng: 77.2090 },
+    bounds: [[28.1, 76.8], [29.5, 77.8]],
     riskLevel: 'MODERATE',
     activeEventsCount: 3,
     totalReports: 890,

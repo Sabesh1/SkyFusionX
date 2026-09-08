@@ -51,7 +51,7 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0E0E12] text-[#EEEEF2] flex flex-col justify-between selection:bg-[#E5A962] selection:text-slate-950 font-sans">
+    <div className="min-h-screen bg-theme-bg text-theme-text flex flex-col justify-between selection:bg-[#E5A962] selection:text-slate-950 font-sans">
       {/* Top Floating Navigation Pill */}
       <header className="px-6 py-5 max-w-7xl w-full mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ export const LandingPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/login')}
-            className="px-4 py-2 rounded-full bg-[#181822] hover:bg-[#252532] border border-[#2B2B3C] text-xs font-mono text-slate-300 transition-colors"
+            className="px-4 py-2 rounded-full bg-theme-surface hover:bg-theme-surface/80 border border-theme-border text-xs font-mono text-theme-text transition-colors"
           >
             Operator Sign In
           </button>
@@ -99,7 +99,7 @@ export const LandingPage: React.FC = () => {
           </span>
         </h1>
 
-        <p className="text-sm sm:text-lg text-slate-400 font-sans max-w-2xl mx-auto leading-relaxed">
+        <p className="text-sm sm:text-lg text-theme-muted font-sans max-w-2xl mx-auto leading-relaxed">
           National disaster surveillance command center bridging citizen ground observations with ISRO satellites, Doppler radars, and Bayesian truth algorithms.
         </p>
 
@@ -114,7 +114,7 @@ export const LandingPage: React.FC = () => {
           </button>
           <button
             onClick={() => navigate('/truth-engine')}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-[#181822] hover:bg-[#252532] border border-[#2B2B3C] text-slate-200 text-sm font-mono transition-all"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-theme-surface hover:bg-theme-surface/80 border border-theme-border text-theme-text text-sm font-mono transition-all"
           >
             <span>Inspect Truth Engine</span>
             <ChevronRight className="w-4 h-4 text-[#E5A962]" />
@@ -126,20 +126,20 @@ export const LandingPage: React.FC = () => {
           {featureCards.map((card, idx) => (
             <div
               key={idx}
-              className="p-5 rounded-3xl bg-gradient-to-b from-[#1C1C24] to-[#121217] border border-[#2B2B3C] hover:border-[#E5A962]/50 transition-all shadow-card-emboss space-y-3 group"
+              className="p-5 rounded-3xl bg-theme-card border border-theme-border hover:border-[#E5A962]/50 transition-all shadow-card-emboss space-y-3 group"
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#252532] border border-[#353545] text-[#E5A962] flex items-center justify-center group-hover:bg-[#322618] group-hover:border-[#E5A962]/50 transition-colors">
+              <div className="w-10 h-10 rounded-2xl bg-theme-surface border border-theme-border-hover text-[#E5A962] flex items-center justify-center group-hover:bg-[#322618] group-hover:border-[#E5A962]/50 transition-colors">
                 <card.icon className="w-5 h-5 text-[#E5A962]" />
               </div>
               <h3 className="font-bold font-display text-sm text-[#F3D9B5]">{card.title}</h3>
-              <p className="text-xs text-slate-400 font-sans leading-relaxed">{card.description}</p>
+              <p className="text-xs text-theme-muted font-sans leading-relaxed">{card.description}</p>
             </div>
           ))}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-6 border-t border-[#20202C] text-center text-xs font-mono text-slate-500">
+      <footer className="px-6 py-6 border-t border-theme-border/80 text-center text-xs font-mono text-theme-muted">
         AI Weather Truth Engine • Ministry of Earth Sciences & Disaster Management Operations Grid
       </footer>
     </div>

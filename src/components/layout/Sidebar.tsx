@@ -65,19 +65,19 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`h-screen sticky top-0 bg-[#0B0E14] border-r border-slate-800/80 flex flex-col justify-between transition-all duration-300 z-40 select-none ${
+      className={`h-screen sticky top-0 bg-theme-surface border-r border-theme-border/80 flex flex-col justify-between transition-all duration-300 z-40 select-none ${
         isSidebarCollapsed ? 'w-[72px]' : 'w-60'
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between">
+      <div className="h-16 px-4 border-b border-theme-border/80 flex items-center justify-between">
         {!isSidebarCollapsed ? (
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm">
               <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
             </div>
             <div>
-              <h1 className="font-sans font-bold text-xs tracking-wide text-slate-100 uppercase">
+              <h1 className="font-sans font-bold text-xs tracking-wide text-theme-text uppercase">
                 Weather Truth
               </h1>
               <p className="text-[10px] font-mono text-cyan-400">National Platform</p>
@@ -93,7 +93,7 @@ export const Sidebar: React.FC = () => {
 
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className={`p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors ${
+          className={`p-1.5 rounded-lg text-theme-muted hover:text-theme-text hover:bg-theme-card/60 transition-colors ${
             isSidebarCollapsed ? 'hidden' : 'block'
           }`}
         >
@@ -106,7 +106,7 @@ export const Sidebar: React.FC = () => {
         {navGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
             {!isSidebarCollapsed && (
-              <div className="px-3 text-[10px] font-mono font-semibold tracking-wider text-slate-500 mb-2">
+              <div className="px-3 text-[10px] font-mono font-semibold tracking-wider text-theme-muted mb-2">
                 {group.group}
               </div>
             )}
@@ -118,7 +118,7 @@ export const Sidebar: React.FC = () => {
                   `flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     isActive
                       ? 'bg-cyan-500/10 text-cyan-400 font-semibold'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                      : 'text-theme-muted hover:text-theme-text hover:bg-theme-card/40'
                   } ${isSidebarCollapsed ? 'justify-center px-0' : ''}`
                 }
               >
@@ -131,20 +131,20 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer Collapse / System Status */}
-      <div className="p-3 border-t border-slate-800/80 bg-[#080B10]">
+      <div className="p-3 border-t border-theme-border/80 bg-theme-bg">
         {!isSidebarCollapsed ? (
-          <div className="flex items-center justify-between px-2 py-1.5 text-[11px] font-mono text-slate-400">
+          <div className="flex items-center justify-between px-2 py-1.5 text-[11px] font-mono text-theme-muted">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>Grid Online</span>
             </span>
-            <span className="text-slate-500">v2.4</span>
+            <span className="text-theme-muted">v2.4</span>
           </div>
         ) : (
           <div className="flex justify-center py-1">
             <button
               onClick={() => setIsSidebarCollapsed(false)}
-              className="text-slate-500 hover:text-slate-300 p-1"
+              className="text-theme-muted hover:text-theme-text p-1"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

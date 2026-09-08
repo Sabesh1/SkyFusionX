@@ -61,6 +61,31 @@ CREATE TABLE IF NOT EXISTS alerts (
     FOREIGN KEY (event_id) REFERENCES weather_events(event_id)
 );
 
+-- Add to weather_events table (Optimistic Locking)
+ALTER TABLE weather_events ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
+
+-- Add event_timeline table
+CREATE TABLE IF NOT EXISTS event_timeline (
+    timeline_id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::varchar,
+    event_id VARCHAR NOT NULL REFERENCES weather_events(event_id) ON DELETE CASCADE,
+    sequence BIGINT NOT NULL,
+    occurred_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    event_state VARCHAR(64) NOT NULL,
+    severity SMALLINT CHECK (severity BETWEEN 1 AND 5),
+    evidence_confidence DOUBLE PRECISION CHECK (evidence_confidence BETWEEN 0 AND 100),
+    prediction_probability DOUBLE PRECISION CHECK (prediction_probability BETWEEN 0 AND 100),
+    risk_score DOUBLE PRECISION CHECK (risk_score BETWEEN 0 AND 100),
+    description TEXT NOT NULL,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    UNIQUE(event_id, sequence)
+);
+
+-- Add critical indexes
+CREATE INDEX IF NOT EXISTS idx_weather_events_center ON weather_events USING GIST(location);
+CREATE INDEX IF NOT EXISTS idx_weather_events_updated ON weather_events(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_weather_events_risk ON weather_events(risk_score DESC);
+CREATE INDEX IF NOT EXISTS idx_event_timeline_event ON event_timeline(event_id, sequence DESC);
+
 -- Triggers for updated_at
 CREATE OR REPLACE FUNCTION update_modified_column()   
 RETURNS TRIGGER AS $$

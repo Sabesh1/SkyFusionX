@@ -22,14 +22,14 @@ export const FusionPipelineGraphic: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 rounded-2xl bg-command-card border border-slate-800 space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div className="p-6 rounded-2xl bg-theme-card border border-theme-border space-y-6">
+      <div className="flex items-center justify-between border-b border-theme-border pb-3">
         <div>
-          <h3 className="text-sm font-mono uppercase font-bold text-slate-100 flex items-center gap-2">
+          <h3 className="text-sm font-mono uppercase font-bold text-theme-text flex items-center gap-2">
             <Cpu className="w-4 h-4 text-cyan-400" />
             Live Multi-Modal Sensor Fusion Pipeline
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-theme-muted mt-0.5">
             Real-time ingestion and normalization across 6 diverse telemetry streams.
           </p>
         </div>
@@ -42,34 +42,34 @@ export const FusionPipelineGraphic: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
         {/* Step 1: 6 Ingestion Streams */}
         <div className="space-y-2">
-          <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold px-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-theme-muted font-bold px-1">
             1. Raw Telemetry Ingest
           </div>
           <div className="grid grid-cols-2 gap-2">
             {sources.map(src => (
               <div
                 key={src.name}
-                className="p-2 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-colors"
+                className="p-2 rounded-lg bg-theme-surface/80 border border-theme-border hover:border-theme-border-hover transition-colors"
               >
                 <div className="flex items-center gap-1.5">
                   <src.icon className={`w-3.5 h-3.5 ${src.color}`} />
-                  <span className="text-[11px] font-medium text-slate-200 truncate">{src.name.split(' ')[0]}</span>
+                  <span className="text-[11px] font-medium text-theme-text truncate">{src.name.split(' ')[0]}</span>
                 </div>
-                <div className="text-[9px] font-mono text-slate-500 truncate mt-0.5">{src.stat}</div>
+                <div className="text-[9px] font-mono text-theme-muted truncate mt-0.5">{src.stat}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Step 2: Normalization Layer */}
-        <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center text-center space-y-2 relative group hover:border-cyan-500/40 transition-all">
+        <div className="p-4 rounded-xl bg-theme-surface/60 border border-theme-border flex flex-col items-center justify-center text-center space-y-2 relative group hover:border-cyan-500/40 transition-all">
           <div className="p-2.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
             <Database className="w-5 h-5" />
           </div>
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase text-slate-500 font-bold">2. Pre-Processing</span>
-            <h4 className="text-xs font-bold text-slate-200">Data Normalization</h4>
-            <p className="text-[10px] text-slate-400">Geo-polygon snapping & timestamp synchronization</p>
+            <span className="text-[10px] font-mono uppercase text-theme-muted font-bold">2. Pre-Processing</span>
+            <h4 className="text-xs font-bold text-theme-text">Data Normalization</h4>
+            <p className="text-[10px] text-theme-muted">Geo-polygon snapping & timestamp synchronization</p>
           </div>
         </div>
 
@@ -80,7 +80,7 @@ export const FusionPipelineGraphic: React.FC = () => {
           </div>
           <div className="space-y-1">
             <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold">3. Multi-Modal Core</span>
-            <h4 className="text-xs font-bold text-slate-100">AI Fusion Engine</h4>
+            <h4 className="text-xs font-bold text-theme-text">AI Fusion Engine</h4>
             <p className="text-[10px] text-cyan-300 font-mono">Bayesian Weight Matrix</p>
           </div>
         </div>
@@ -92,7 +92,7 @@ export const FusionPipelineGraphic: React.FC = () => {
           </div>
           <div className="space-y-1">
             <span className="text-[10px] font-mono uppercase text-emerald-400 font-bold">4. Actionable Incident</span>
-            <h4 className="text-xs font-bold text-slate-100">Verified Weather Event</h4>
+            <h4 className="text-xs font-bold text-theme-text">Verified Weather Event</h4>
             <p className="text-[10px] font-mono text-emerald-300">93% Fusion Confidence</p>
           </div>
         </div>

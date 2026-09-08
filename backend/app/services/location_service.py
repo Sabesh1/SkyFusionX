@@ -231,6 +231,7 @@ def fetch_and_store_weather(location: Dict[str, Any], db: Session) -> Optional[D
         }
 
     except Exception as e:
+        db.rollback()
         logger.error(f"[Weather] Open-Meteo fetch error for {loc_id}: {e}")
         return None
 

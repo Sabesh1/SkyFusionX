@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { clusteringApi } from '../services/clusteringApi';
-import { ClusterDetail } from '../data/mockClustering';
+import { ClusterDetail } from '../types/cluster';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { ClusterDeduplicationStat } from '../components/clustering/ClusterDeduplicationStat';
 import { SeverityBadge } from '../components/common/SeverityBadge';
@@ -22,7 +22,7 @@ export const EventClusteringPage: React.FC = () => {
     const fetchClusters = async () => {
       const data = await clusteringApi.getEventClusters();
       setClusters(data);
-      setSelectedCluster(data[0]);
+      setSelectedCluster(data.length > 0 ? data[0] : null);
     };
     fetchClusters();
   }, []);
@@ -41,7 +41,7 @@ export const EventClusteringPage: React.FC = () => {
       {/* Clustered Event Cards Grid */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-mono uppercase font-bold text-slate-400">
+          <h3 className="text-xs font-mono uppercase font-bold text-theme-muted">
             Active Regional Disaster Clusters ({clusters.length})
           </h3>
           <span className="text-xs font-mono text-cyan-400">
@@ -56,8 +56,8 @@ export const EventClusteringPage: React.FC = () => {
               onClick={() => setSelectedCluster(cl)}
               className={`p-5 rounded-2xl border transition-all cursor-pointer shadow-sm space-y-4 ${
                 selectedCluster?.id === cl.id
-                  ? 'bg-[#141926] border-cyan-500/60 ring-1 ring-cyan-500/30'
-                  : 'bg-[#121620] border-slate-800/80 hover:border-slate-700 hover:bg-[#161B28]'
+                  ? 'bg-theme-surface border-cyan-500/60 ring-1 ring-cyan-500/30'
+                  : 'bg-theme-card border-theme-border/80 hover:border-theme-border-hover hover:bg-theme-surface'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -68,21 +68,21 @@ export const EventClusteringPage: React.FC = () => {
               </div>
 
               <div>
-                <h4 className="text-sm font-bold text-slate-100 font-sans">
+                <h4 className="text-sm font-bold text-theme-text font-sans">
                   {cl.clusterName}
                 </h4>
-                <p className="text-xs text-slate-400 flex items-center gap-1 font-mono mt-1">
+                <p className="text-xs text-theme-muted flex items-center gap-1 font-mono mt-1">
                   <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                   <span>{cl.location}</span>
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-800/80 text-xs font-mono text-slate-300">
+              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-theme-border/80 text-xs font-mono text-theme-text">
                 <div className="flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-slate-400" />
+                  <Users className="w-3.5 h-3.5 text-theme-muted" />
                   <span>{cl.rawReportCount} Reports</span>
                 </div>
-                <div className="flex items-center gap-1.5 justify-end text-slate-400">
+                <div className="flex items-center gap-1.5 justify-end text-theme-muted">
                   <Clock className="w-3.5 h-3.5" />
                   <span>{cl.activeWindowMinutes}m window</span>
                 </div>

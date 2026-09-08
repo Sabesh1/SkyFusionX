@@ -63,22 +63,22 @@ export const AssistantChatBox: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col h-[640px] rounded-2xl bg-[#121620] border border-slate-800/80 shadow-sm overflow-hidden">
+    <div className="max-w-4xl mx-auto flex flex-col h-[640px] rounded-2xl bg-theme-card border border-theme-border/80 shadow-sm overflow-hidden">
       {/* Chat Header */}
-      <div className="h-14 px-6 bg-[#0B0E14] border-b border-slate-800/80 flex items-center justify-between shrink-0">
+      <div className="h-14 px-6 bg-theme-surface border-b border-theme-border/80 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
             <Bot className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold font-sans text-slate-100 uppercase tracking-wide">
+            <h3 className="text-xs font-bold font-sans text-theme-text uppercase tracking-wide">
               Grounded AI Weather Assistant
             </h3>
             <p className="text-[10px] font-mono text-cyan-400">Zero Hallucination • Cites Live Telemetry</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+        <div className="flex items-center gap-2 text-xs font-mono text-theme-muted">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <span>Live Ops</span>
         </div>
@@ -97,7 +97,7 @@ export const AssistantChatBox: React.FC = () => {
             <div
               className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold ${
                 msg.sender === 'user'
-                  ? 'bg-slate-800 text-slate-200 border border-slate-700'
+                  ? 'bg-theme-card text-theme-text border border-theme-border-hover'
                   : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
               }`}
             >
@@ -108,15 +108,15 @@ export const AssistantChatBox: React.FC = () => {
             <div
               className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed space-y-2.5 font-sans ${
                 msg.sender === 'user'
-                  ? 'bg-cyan-500/10 border border-cyan-500/30 text-slate-100 rounded-tr-none'
-                  : 'bg-[#0B0E14] border border-slate-800/80 text-slate-200 rounded-tl-none'
+                  ? 'bg-cyan-500/10 border border-cyan-500/30 text-theme-text rounded-tr-none'
+                  : 'bg-theme-surface border border-theme-border/80 text-theme-text rounded-tl-none'
               }`}
             >
               <div className="whitespace-pre-line">{msg.text}</div>
 
               {/* Verified Telemetry Citations */}
               {msg.sourceChips && msg.sourceChips.length > 0 && (
-                <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
+                <div className="pt-2 border-t border-theme-border/80 space-y-1.5">
                   <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider block">
                     Verified Sensor Citations:
                   </span>
@@ -124,7 +124,7 @@ export const AssistantChatBox: React.FC = () => {
                     {msg.sourceChips.map((cite: AssistantSourceChip, idx: number) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded-lg bg-[#121620] border border-slate-800 text-[10px] font-mono text-slate-300 flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-lg bg-theme-card border border-theme-border text-[10px] font-mono text-theme-text flex items-center gap-1"
                       >
                         <Database className="w-3 h-3 text-cyan-400" />
                         {cite.name}
@@ -134,7 +134,7 @@ export const AssistantChatBox: React.FC = () => {
                 </div>
               )}
 
-              <div className="text-[10px] font-mono text-slate-500 text-right">
+              <div className="text-[10px] font-mono text-theme-muted text-right">
                 {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
@@ -143,7 +143,7 @@ export const AssistantChatBox: React.FC = () => {
 
         {/* Typing indicator */}
         {isTyping && (
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 p-3 bg-[#0B0E14] border border-slate-800/80 rounded-2xl w-fit">
+          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 p-3 bg-theme-surface border border-theme-border/80 rounded-2xl w-fit">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
             <span>AI Copilot querying 1,284 weather stations & Truth Engine...</span>
           </div>
@@ -151,13 +151,13 @@ export const AssistantChatBox: React.FC = () => {
       </div>
 
       {/* Suggested Questions Ribbon */}
-      <div className="px-6 py-2 bg-[#0B0E14]/60 border-t border-slate-800/60 flex items-center gap-2 overflow-x-auto text-[11px] font-mono">
-        <span className="text-slate-500 shrink-0">Try:</span>
+      <div className="px-6 py-2 bg-theme-surface/60 border-t border-theme-border/60 flex items-center gap-2 overflow-x-auto text-[11px] font-mono">
+        <span className="text-theme-muted shrink-0">Try:</span>
         {sampleQueries.map((q, idx) => (
           <button
             key={idx}
             onClick={() => handleSend(q)}
-            className="px-3 py-1 rounded-full bg-[#121620] hover:bg-[#1A1F2C] border border-slate-800 text-slate-300 hover:text-cyan-300 shrink-0 transition-colors"
+            className="px-3 py-1 rounded-full bg-theme-card hover:bg-theme-surface border border-theme-border text-theme-text hover:text-cyan-300 shrink-0 transition-colors"
           >
             {q}
           </button>
@@ -170,14 +170,14 @@ export const AssistantChatBox: React.FC = () => {
           e.preventDefault();
           handleSend();
         }}
-        className="p-4 bg-[#0B0E14] border-t border-slate-800/80 flex items-center gap-3 shrink-0"
+        className="p-4 bg-theme-surface border-t border-theme-border/80 flex items-center gap-3 shrink-0"
       >
         <input
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Ask about weather events, truth scores, AWS sensor telemetry..."
-          className="flex-1 px-4 py-2.5 rounded-xl bg-[#121620] border border-slate-800 text-xs text-slate-200 outline-none focus:border-cyan-500/50 font-sans"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-theme-card border border-theme-border text-xs text-theme-text outline-none focus:border-cyan-500/50 font-sans"
         />
         <button
           type="submit"

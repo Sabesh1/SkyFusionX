@@ -48,7 +48,7 @@ export const TrustScoreGauge: React.FC<TrustScoreGaugeProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center relative select-none">
-      <div className="relative flex items-center justify-center p-3 rounded-full bg-gradient-to-b from-[#1C1C26] to-[#121217] shadow-card-emboss border border-[#2B2B3C]">
+      <div className="relative flex items-center justify-center p-3 rounded-full bg-theme-surface shadow-card-emboss border border-theme-border/80">
         <svg
           width={viewBoxSize}
           height={viewBoxSize}
@@ -174,7 +174,7 @@ export const TrustScoreGauge: React.FC<TrustScoreGaugeProps> = ({
             )}
             <span className="text-[#F3D9B5]">{verdict || current.label}</span>
           </div>
-          {subtext && <p className="text-[11px] text-slate-400 mt-1 max-w-[220px] text-center font-sans">{subtext}</p>}
+          {subtext && <p className="text-[11px] text-theme-muted mt-1 max-w-[220px] text-center font-sans">{subtext}</p>}
         </div>
       )}
     </div>

@@ -1,12 +1,32 @@
-from typing import Dict, Any
+from dataclasses import dataclass
+from typing import Mapping
+
+
+@dataclass(frozen=True)
+class TruthEvidence:
+    source: float
+    location: float
+    timestamp: float
+    weather_data: float
+    nearby_reports: float
+    media: float
+    historical: float
+
+    def __post_init__(self):
+        for name, val in self.__dict__.items():
+            if not 0 <= val <= 100:
+                raise ValueError(f"{name} must be 0-100, got {val}")
+
+
+@dataclass(frozen=True)
+class TruthScore:
+    overall: float
+    factors: Mapping[str, float]
+    status: str
+    requires_human_review: bool
+
 
 class TruthEngine:
-    """
-    Explainable Evidence-Based Truth Engine.
-    Calculates a transparent Trust Score from seven factors.
-    """
-    
-    # Weights
     WEIGHTS = {
         "source": 0.15,
         "location": 0.15,
@@ -14,32 +34,59 @@ class TruthEngine:
         "weather_data": 0.20,
         "nearby_reports": 0.15,
         "media": 0.15,
-        "historical": 0.10
+        "historical": 0.10,
     }
 
-    # Baseline source reliability
     SOURCE_SCORES = {
         "IMD": 95,
         "WeatherAPI": 80,
         "Citizen": 50,
-        "Social": 30
+        "Social": 30,
     }
 
+    def __init__(self):
+        assert abs(sum(self.WEIGHTS.values()) - 1.0) < 1e-9
+
+    def calculate(self, evidence: TruthEvidence) -> TruthScore:
+        factors = {
+            "source": evidence.source,
+            "location": evidence.location,
+            "timestamp": evidence.timestamp,
+            "weather_data": evidence.weather_data,
+            "nearby_reports": evidence.nearby_reports,
+            "media": evidence.media,
+            "historical": evidence.historical,
+        }
+        score = sum(factors[name] * weight for name, weight in self.WEIGHTS.items())
+        score = round(max(0.0, min(100.0, score)), 2)
+
+        if score >= 85:
+            status, human_review = "HIGH_CONFIDENCE", False
+        elif score >= 70:
+            status, human_review = "MEDIUM_HIGH_CONFIDENCE", False
+        elif score >= 40:
+            status, human_review = "REQUIRES_HUMAN_REVIEW", True
+        else:
+            status, human_review = "LOW_CONFIDENCE", True
+
+        return TruthScore(
+            overall=score,
+            factors=factors,
+            status=status,
+            requires_human_review=human_review,
+        )
+
     @classmethod
-    def evaluate(cls, observation: Dict[str, Any], context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def from_observation(cls, observation: dict, context: dict = None) -> TruthScore:
         """
-        Evaluate an observation and return a trust score and explanation.
+        Legacy compatibility method that builds TruthEvidence from observation dict.
         """
         if context is None:
             context = {}
 
-        # 1. Source (15%)
         source_name = observation.get("source", "Citizen")
         source_score = cls.SOURCE_SCORES.get(source_name, 50)
 
-        # 2. Location (15%)
-        # Prototype: Checks whether coordinates are geographically plausible for India
-        # Rough bounding box for India: Lat 8.0 to 37.5, Lon 68.0 to 97.5
         lat = observation.get("latitude", 0.0)
         lon = observation.get("longitude", 0.0)
         if 8.0 <= lat <= 37.5 and 68.0 <= lon <= 97.5:
@@ -47,60 +94,28 @@ class TruthEngine:
         else:
             location_score = 10
 
-        # 3. Timestamp (10%)
-        # Prototype: Recent timestamps score higher. We'll just assume it's recent for the demo.
         timestamp_score = 90
 
-        # 4. Weather Data Agreement (20%)
-        # Prototype: Use available weather observations or demo values
         weather_data_score = context.get("weather_agreement", 75)
-
-        # 5. Nearby Corroboration (15%)
-        # Prototype: Passed in via context based on PostGIS query
         nearby_reports_score = context.get("nearby_corroboration", 50)
 
-        # 6. Media (15%)
-        # Prototype: media present -> higher evidence
-        has_media = bool(observation.get("media_url"))
-        media_score = 90 if has_media else 40
+        image_analyzed_state = observation.get("image_analyzed_state", "NOT_ANALYZED")
+        if image_analyzed_state == "ANALYZED":
+            media_score = 90
+        elif image_analyzed_state == "ANALYSIS_FAILED":
+            media_score = 40
+        else:
+            media_score = 40
 
-        # 7. Historical Consistency (10%)
-        # Prototype: deterministic baseline
         historical_score = 70
 
-        # Calculate final score
-        raw_score = (
-            source_score * cls.WEIGHTS["source"] +
-            location_score * cls.WEIGHTS["location"] +
-            timestamp_score * cls.WEIGHTS["timestamp"] +
-            weather_data_score * cls.WEIGHTS["weather_data"] +
-            nearby_reports_score * cls.WEIGHTS["nearby_reports"] +
-            media_score * cls.WEIGHTS["media"] +
-            historical_score * cls.WEIGHTS["historical"]
+        evidence = TruthEvidence(
+            source=source_score,
+            location=location_score,
+            timestamp=timestamp_score,
+            weather_data=weather_data_score,
+            nearby_reports=nearby_reports_score,
+            media=media_score,
+            historical=historical_score,
         )
-
-        trust_score = max(0, min(100, round(raw_score, 1)))
-
-        # Determine Status
-        if trust_score >= 85:
-            status = "HIGH_CONFIDENCE"
-        elif trust_score >= 70:
-            status = "MEDIUM_HIGH_CONFIDENCE"
-        elif trust_score >= 40:
-            status = "REQUIRES_HUMAN_REVIEW"
-        else:
-            status = "LOW_CONFIDENCE"
-
-        return {
-            "trust_score": trust_score,
-            "status": status,
-            "evidence": {
-                "source": source_score,
-                "location": location_score,
-                "timestamp": timestamp_score,
-                "weather_data": weather_data_score,
-                "nearby_reports": nearby_reports_score,
-                "media": media_score,
-                "historical": historical_score
-            }
-        }
+        return cls().calculate(evidence)

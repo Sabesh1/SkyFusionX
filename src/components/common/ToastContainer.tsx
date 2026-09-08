@@ -18,10 +18,10 @@ export const ToastContainer: React.FC = () => {
         };
 
         const borderMap = {
-          success: 'border-emerald-500/40 bg-slate-900/95',
-          error: 'border-red-500/40 bg-slate-900/95',
-          warning: 'border-amber-500/40 bg-slate-900/95',
-          info: 'border-cyan-500/40 bg-slate-900/95',
+          success: 'border-emerald-500/40 bg-theme-surface/95',
+          error: 'border-red-500/40 bg-theme-surface/95',
+          warning: 'border-amber-500/40 bg-theme-surface/95',
+          info: 'border-cyan-500/40 bg-theme-surface/95',
         };
 
         return (
@@ -32,14 +32,14 @@ export const ToastContainer: React.FC = () => {
             {iconMap[toast.type]}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-slate-100 uppercase tracking-wider">{toast.title}</h4>
-                <span className="text-[10px] font-mono text-slate-500">{toast.timestamp}</span>
+                <h4 className="text-xs font-bold text-theme-text uppercase tracking-wider">{toast.title}</h4>
+                <span className="text-[10px] font-mono text-theme-muted">{toast.timestamp}</span>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">{toast.message}</p>
+              <p className="text-xs text-theme-text mt-0.5 leading-relaxed">{toast.message}</p>
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-slate-500 hover:text-slate-300 p-0.5 rounded transition-colors"
+              className="text-theme-muted hover:text-theme-text p-0.5 rounded transition-colors"
             >
               <X className="w-4 h-4" />
             </button>

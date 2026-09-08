@@ -39,7 +39,7 @@ export const PredictionsPage: React.FC = () => {
       />
 
       {/* Hero Prediction Card (Top Primary Focus) */}
-      <div className="p-6 md:p-8 rounded-2xl bg-[#121620] border border-red-500/30 shadow-sm space-y-6">
+      <div className="p-6 md:p-8 rounded-2xl bg-theme-card border border-red-500/30 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -48,58 +48,58 @@ export const PredictionsPage: React.FC = () => {
               </span>
               <SeverityBadge severity={activePred.severity} size="sm" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold font-sans text-slate-100 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold font-sans text-theme-text flex items-center gap-2">
               <TriangleAlert className="w-6 h-6 text-red-400 shrink-0" />
               {activePred.primaryRiskTitle} — {activePred.location}
             </h2>
-            <p className="text-xs text-slate-400 font-sans">
+            <p className="text-xs text-theme-muted font-sans">
               Peak Escalation Window: <strong className="text-cyan-400 font-mono">{activePred.peakTime}</strong>
             </p>
           </div>
 
-          <div className="px-6 py-4 rounded-2xl bg-[#0B0E14] border border-red-500/40 text-center font-mono">
+          <div className="px-6 py-4 rounded-2xl bg-theme-surface border border-red-500/40 text-center font-mono">
             <div className="text-3xl sm:text-4xl font-bold text-red-400">{activePred.overallProbability}%</div>
-            <div className="text-[10px] text-slate-400 uppercase font-semibold">Flood Risk Index</div>
+            <div className="text-[10px] text-theme-muted uppercase font-semibold">Flood Risk Index</div>
           </div>
         </div>
 
         {/* 3 Compact Probability Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-          <div className="p-4 rounded-xl bg-[#0B0E14] border border-slate-800/80 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="p-4 rounded-xl bg-theme-surface border border-theme-border/80 space-y-2">
+            <div className="flex items-center justify-between text-xs text-theme-muted">
               <span className="font-mono font-medium">Heavy Rainfall Probability</span>
               <CloudRain className="w-4 h-4 text-cyan-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-cyan-400">
               {activePred.heavyRainProbability}%
             </div>
-            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-theme-card rounded-full overflow-hidden">
               <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${activePred.heavyRainProbability}%` }} />
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#0B0E14] border border-slate-800/80 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="p-4 rounded-xl bg-theme-surface border border-theme-border/80 space-y-2">
+            <div className="flex items-center justify-between text-xs text-theme-muted">
               <span className="font-mono font-medium">Urban Inundation Probability</span>
               <Waves className="w-4 h-4 text-red-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-red-400">
               {activePred.floodProbability}%
             </div>
-            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-theme-card rounded-full overflow-hidden">
               <div className="h-full bg-red-400 rounded-full" style={{ width: `${activePred.floodProbability}%` }} />
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#0B0E14] border border-slate-800/80 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="p-4 rounded-xl bg-theme-surface border border-theme-border/80 space-y-2">
+            <div className="flex items-center justify-between text-xs text-theme-muted">
               <span className="font-mono font-medium">Storm Wind Gust Index</span>
               <Wind className="w-4 h-4 text-amber-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-amber-400">
               {activePred.stormProbability}%
             </div>
-            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-theme-card rounded-full overflow-hidden">
               <div className="h-full bg-amber-400 rounded-full" style={{ width: `${activePred.stormProbability}%` }} />
             </div>
           </div>

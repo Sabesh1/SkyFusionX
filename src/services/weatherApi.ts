@@ -57,7 +57,7 @@ export const weatherApi = {
         criticalZones: {
           id: 'kpi-critical',
           title: 'Critical Zones',
-          value: 0, // Could calculate based on severity distribution
+          value: rawStats.severity_distribution ? (rawStats.severity_distribution['4'] || 0) + (rawStats.severity_distribution['5'] || 0) : 0,
           changePercent: 0,
           subtext: 'NDRF Alert Active',
           trend: 'neutral',

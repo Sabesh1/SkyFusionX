@@ -14,3 +14,12 @@ class Alert(Base):
     generated_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
     delivery_status = Column(String)
     language = Column(String, default="en")
+
+class TranslatedAlert(Base):
+    __tablename__ = "translated_alerts"
+
+    id = Column(String, primary_key=True)
+    alert_id = Column(String, ForeignKey("alerts.alert_id"), nullable=False)
+    language = Column(String, nullable=False)
+    translated_text = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)

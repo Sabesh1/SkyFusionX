@@ -15,6 +15,7 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
     verified_reports = db.query(func.count(Observation.id)).filter(Observation.verification_status == "VERIFIED").scalar()
     pending_reports = db.query(func.count(Observation.id)).filter(Observation.verification_status == "UNDER_REVIEW").scalar()
     rejected_reports = db.query(func.count(Observation.id)).filter(Observation.verification_status == "REJECTED").scalar()
+    processing_reports = db.query(func.count(Observation.id)).filter(Observation.verification_status == "PROCESSING").scalar()
     
     total_events = db.query(func.count(WeatherEvent.event_id)).scalar()
     
@@ -28,6 +29,7 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
         "verified_reports": verified_reports,
         "pending_reports": pending_reports,
         "rejected_reports": rejected_reports,
+        "processing_reports": processing_reports,
         "total_events": total_events,
         "state_distribution": state_distribution,
         "event_distribution": event_distribution,
