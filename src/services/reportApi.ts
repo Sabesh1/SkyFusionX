@@ -241,19 +241,42 @@ export const reportApi = {
   },
 
   async generateMockLiveReport(): Promise<WeatherReport | null> {
-    // Generate a real report in the backend instead of just returning a mock
-    const res = await this.submitReport({
-        source: 'Citizen App',
-        content: 'Auto-generated test report via UI button',
-        latitude: 12.9716,
-        longitude: 77.5946,
+    // Return a local mock instead of spamming the backend database
+    const mockReport: WeatherReport = {
+        id: `MOCK-${Date.now()}`,
+        title: 'Report Ping: Bengaluru',
+        text: 'Auto-generated test report via UI button',
         city: 'Bengaluru',
-        state: 'Karnataka'
-    });
-    
-    if (res && res.observation_id) {
-        return this.getReportById(res.observation_id);
-    }
-    return null;
+        version: 1,
+        locationName: 'Bengaluru',
+        district: 'Bengaluru Urban',
+        state: 'Karnataka',
+        coordinates: { lat: 12.9716, lng: 77.5946 },
+        event: 'Heavy Rainfall',
+        source: 'Citizen App',
+        sourceHandle: '@mock_user',
+        sourceReputation: 50,
+        trustScore: 40,
+        status: 'UNDER_REVIEW',
+        severity: 'MODERATE',
+        timestamp: new Date().toISOString(),
+        evidence: [],
+        verificationFactors: {
+            sourceCredibility: 80,
+            locationMatch: 90,
+            timestampValidity: 95,
+            weatherApiMatch: 85,
+            nearbyReports: 70,
+            visualEvidence: 20,
+            satelliteCorrelation: 80
+        },
+        aiExplanation: 'Auto-generated mock report for UI testing.',
+        aiStatus: 'FALLBACK',
+        modelVersion: 'fallback',
+        isDuplicate: false,
+        geminiAnalyzed: false,
+        imageAnalyzed: false
+    };
+    return mockReport;
   }
 };

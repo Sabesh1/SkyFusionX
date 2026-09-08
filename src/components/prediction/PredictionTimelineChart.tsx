@@ -27,8 +27,8 @@ export const PredictionTimelineChart: React.FC<PredictionTimelineChartProps> = (
     <div className="p-6 rounded-3xl bg-theme-card border border-theme-border/80 space-y-4 shadow-card-emboss">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-theme-border/80 pb-3">
         <div>
-          <h4 className="text-sm font-bold font-mono text-[#F3D9B5] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#E5A962] animate-pulse" />
+          <h4 className="text-sm font-bold font-mono text-theme-text-secondary flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-theme-primary animate-pulse" />
             AI Hydrodynamic Rainfall & Flood Escalation Wave
           </h4>
           <p className="text-xs text-theme-muted font-sans mt-0.5">
@@ -36,7 +36,7 @@ export const PredictionTimelineChart: React.FC<PredictionTimelineChartProps> = (
           </p>
         </div>
         <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="px-2.5 py-1 rounded-full bg-[#292218] border border-[#E5A962]/40 text-[#E5A962] font-bold">
+          <span className="px-2.5 py-1 rounded-full bg-theme-surface border border-theme-primary/40 text-theme-primary font-bold">
             91% Convergence
           </span>
         </div>
@@ -47,30 +47,30 @@ export const PredictionTimelineChart: React.FC<PredictionTimelineChartProps> = (
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
             <defs>
               {/* Luxury Gold Wave Gradient Fill */}
-              <linearGradient id="goldWaveFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#E5A962" stopOpacity={0.45} />
-                <stop offset="50%" stopColor="#D49547" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#8C5E28" stopOpacity={0.0} />
+              <linearGradient id="probGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--theme-primary)" stopOpacity={0.45} />
+                <stop offset="50%" stopColor="var(--theme-primary-hover)" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="var(--theme-primary)" stopOpacity={0.0} />
               </linearGradient>
 
-              {/* Rain Intensity Wave */}
-              <linearGradient id="rainWaveFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
+              <linearGradient id="rainGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--theme-secondary)" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="var(--theme-secondary)" stopOpacity={0.0} />
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="3 3" stroke="#22222E" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} />
 
             <XAxis
               dataKey="time"
-              stroke="#68687C"
+              stroke="var(--theme-text-secondary)"
               fontSize={11}
               fontFamily="JetBrains Mono"
               tickLine={false}
             />
             <YAxis
-              stroke="#68687C"
+              yAxisId="left"
+              stroke="var(--theme-text-secondary)"
               fontSize={11}
               fontFamily="JetBrains Mono"
               tickLine={false}
@@ -79,36 +79,37 @@ export const PredictionTimelineChart: React.FC<PredictionTimelineChartProps> = (
 
             <Tooltip
               contentStyle={{
-                backgroundColor: '#16161E',
-                borderColor: '#E5A962',
-                borderRadius: '16px',
+                backgroundColor: 'var(--theme-surface)',
+                borderColor: 'var(--theme-border)',
+                borderRadius: '12px',
                 fontFamily: 'JetBrains Mono',
                 fontSize: '11px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.8)',
-                color: '#EEEEF2',
+                color: 'var(--theme-text)',
               }}
             />
 
-            <Legend wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono' }} />
+            <Legend wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono', color: 'var(--theme-text)' }} />
 
             <Area
+              yAxisId="left"
               type="monotone"
               dataKey="floodRisk"
-              name="Flood Risk Index (%)"
-              stroke="#E5A962"
-              strokeWidth={3}
-              fill="url(#goldWaveFill)"
-              dot={{ r: 4, fill: '#E5A962', stroke: '#121217', strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: '#F3D9B5', stroke: '#E5A962', strokeWidth: 2 }}
+              name="Inundation Risk (%)"
+              stroke="var(--theme-primary)"
+              strokeWidth={2}
+              fill="url(#probGrad)"
+              dot={{ r: 4, fill: 'var(--theme-primary)', stroke: 'var(--theme-surface)', strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: 'var(--theme-text-secondary)', stroke: 'var(--theme-primary)', strokeWidth: 2 }}
             />
 
             <Area
+              yAxisId="left"
               type="monotone"
               dataKey="rainRate"
-              name="Rainfall Probability (%)"
-              stroke="#38BDF8"
+              name="Rainfall (mm/h)"
+              stroke="var(--theme-secondary)"
               strokeWidth={2}
-              fill="url(#rainWaveFill)"
+              fill="url(#rainGrad)"
               strokeDasharray="4 4"
             />
           </AreaChart>
@@ -117,7 +118,7 @@ export const PredictionTimelineChart: React.FC<PredictionTimelineChartProps> = (
 
       <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-theme-muted pt-2 border-t border-theme-border/80">
         <span>Model: NeuralHydro-LSTM v3.4</span>
-        <span className="text-[#E5A962]">Peak Inundation Window: {prediction.peakTime}</span>
+        <span className="text-theme-primary">Peak Inundation Window: {prediction.peakTime}</span>
       </div>
     </div>
   );

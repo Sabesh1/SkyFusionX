@@ -84,8 +84,8 @@ export const FactorBreakdown: React.FC<FactorBreakdownProps> = ({
           >
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-[#242430] text-[#E5A962] border border-[#353545]">
-                  <Icon className="w-3.5 h-3.5 text-[#E5A962]" />
+                <div className="p-1.5 rounded-lg bg-theme-surface text-theme-primary border border-theme-border">
+                  <Icon className="w-3.5 h-3.5 text-theme-primary" />
                 </div>
                 <div>
                   <span className="font-semibold text-theme-text font-sans">{item.label}</span>
@@ -96,7 +96,7 @@ export const FactorBreakdown: React.FC<FactorBreakdownProps> = ({
               </div>
 
               <div className="text-right font-mono">
-                <span className="text-xs font-bold text-[#F3D9B5]">{value}%</span>
+                <span className="text-xs font-bold text-theme-text-secondary">{value}%</span>
               </div>
             </div>
 
@@ -108,12 +108,12 @@ export const FactorBreakdown: React.FC<FactorBreakdownProps> = ({
                 max="100"
                 value={value}
                 onChange={e => onFactorChange && onFactorChange(item.key, Number(e.target.value))}
-                className="w-full accent-[#E5A962] h-2 bg-[#22222E] rounded-full cursor-pointer"
+                className="w-full accent-theme-primary h-2 bg-theme-card rounded-full cursor-pointer"
               />
             ) : (
-              <div className="w-full h-1.5 bg-[#22222E] rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-theme-card rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-[#8C5E28] via-[#D49547] to-[#E5A962]"
+                  className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-theme-primary-hover to-theme-primary"
                   style={{ width: `${value}%` }}
                 />
               </div>

@@ -454,7 +454,7 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
@@ -529,7 +529,7 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
 
               <button
                 onClick={handleReset}
-                className="px-6 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono shadow-md hover:bg-cyan-400 transition-all"
+                className="px-6 py-2.5 rounded-xl bg-cyan-500 text-white font-bold text-xs font-mono shadow-md hover:bg-cyan-400 transition-all"
               >
                 Close & Return to Dashboard
               </button>

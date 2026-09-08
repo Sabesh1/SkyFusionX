@@ -256,15 +256,19 @@ async def process_report_background(event_id: str, event_data: Any):
                         image_analyzed=True,
                         event_type=cached_obs.ml_event_type or obs.event_type or "OTHER",
                         confidence=cached_obs.ml_confidence or 0.8,
-                        trust_score=cached_obs.trust_score or 85.0,
+                        trust_score=20.0, # Apply severe duplicate evidence penalty (e.g. 20 instead of 85+)
                         verification_status=cached_obs.verification_assessment or "EVIDENCE_SUPPORTED",
                         supporting_evidence=cached_json.get("supporting", []),
                         contradicting_evidence=cached_json.get("contradicting", []),
                         evidence_assessment=cached_json.get("assessment", ""),
                         recommendation=cached_obs.verification_recommendation or "AUTO_ACCEPT",
-                        reason="Reused analysis from identical visual evidence."
+                        reason="Duplicate image detected — image has already been submitted in another report."
                     )
                     obs.image_analyzed_state = "ANALYZED"
+                    obs.is_duplicate = True
+                    obs.duplicate_of_id = cached_obs.id
+                    obs.duplicate_similarity = 1.0
+                    obs.duplicate_reason = "Duplicate image detected — image has already been submitted in another report."
                 else:
                     if image_bytes:
                         obs.image_analyzed_state = "ANALYZING"
@@ -379,7 +383,8 @@ async def process_report_background(event_id: str, event_data: Any):
                     obs.duplicate_of_id = dup_result.duplicate_of_id
                     obs.duplicate_similarity = dup_result.similarity
                 else:
-                    obs.is_duplicate = False
+                    if not obs.is_duplicate:
+                        obs.is_duplicate = False
             except Exception as e:
                 db.rollback()
                 logger.warning(f"Duplicate detection failed for {event_id}: {e}")

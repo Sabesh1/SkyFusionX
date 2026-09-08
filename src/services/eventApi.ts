@@ -30,7 +30,7 @@ export const eventApi = {
     if (filter?.state && filter.state !== 'ALL') params.append('state', filter.state);
     if (filter?.severity && filter.severity !== 'ALL') params.append('severity', filter.severity);
     if (filter?.event_type && filter.event_type !== 'ALL') params.append('event_type', filter.event_type);
-    
+
     if (params.toString()) {
       query = `?${params.toString()}`;
     }
@@ -64,7 +64,7 @@ export const eventApi = {
         };
 
         const evType: WeatherEventType = typeMap[be.event_type] || 'Urban Flooding';
-        
+
         let resolvedState = filter?.state || 'Unknown';
         if (resolvedState === 'Unknown' || resolvedState === 'ALL') {
           // Find the closest state by coordinates to ensure dropdown works
@@ -104,8 +104,8 @@ export const eventApi = {
           timeline: [
             {
               id: `tl-1-${be.event_id}`,
-              time: new Date(be.start_time || Date.now() - 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              timestamp: be.start_time || new Date(Date.now() - 3600000).toISOString(),
+              time: new Date(Date.now() - 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              timestamp: new Date(Date.now() - 3600000).toISOString(),
               eventTitle: `Initial ${evType} Detection`,
               description: `System identified emerging ${evType.toLowerCase()} event based on localized ground reports.`,
               source: 'Citizen App',
@@ -115,8 +115,8 @@ export const eventApi = {
             },
             {
               id: `tl-2-${be.event_id}`,
-              time: new Date(be.last_observed_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              timestamp: be.last_observed_at || new Date().toISOString(),
+              time: new Date(Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              timestamp: new Date().toISOString(),
               eventTitle: 'Latest Telemetry Verified',
               description: `Multi-modal verification complete for latest reports. Confidence score updated.`,
               source: 'SkyFusion AI',
@@ -162,8 +162,8 @@ export const eventApi = {
         timeline: [
           {
             id: `tl-1-${backendEvent.event_id}`,
-            time: new Date(backendEvent.start_time || Date.now() - 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            timestamp: backendEvent.start_time || new Date(Date.now() - 3600000).toISOString(),
+            time: new Date(Date.now() - 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: new Date(Date.now() - 3600000).toISOString(),
             eventTitle: `Initial ${backendEvent.event_type || 'Event'} Report`,
             description: `First localized report of conditions detected via citizen observation.`,
             source: 'Citizen App',
@@ -173,8 +173,8 @@ export const eventApi = {
           },
           {
             id: `tl-2-${backendEvent.event_id}`,
-            time: new Date(backendEvent.last_observed_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            timestamp: backendEvent.last_observed_at || new Date(Date.now()).toISOString(),
+            time: new Date(Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: new Date(Date.now()).toISOString(),
             eventTitle: 'AI Truth Engine Verification',
             description: `Multi-modal verification complete. Confidence score increased due to corroborating satellite imagery.`,
             source: 'SkyFusion AI',
@@ -187,7 +187,7 @@ export const eventApi = {
         reportIds: [],
       };
     }
-    
+
     return null;
   }
 };

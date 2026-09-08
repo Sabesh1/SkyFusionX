@@ -12,52 +12,62 @@
     --theme-border-hover: #CBD5E1;
     --theme-muted: #64748B;
     --theme-text: #0F172A;
+    --theme-text-secondary: #475569;
     --theme-glass: rgba(255, 255, 255, 0.7);
-    --theme-accent: #E5A962;
+    --theme-accent: #1E293B;
+    --theme-primary: #0D9488;
+    --theme-primary-hover: #0F766E;
+    --theme-secondary: #0284C7;
+    --theme-secondary-hover: #0369A1;
   }
   
   .dark {
     /* DARK AMOLED THEME */
     --theme-bg: #000000;
-    --theme-surface: #0E0E11;
-    --theme-card: #141418;
-    --theme-border: #272734;
-    --theme-border-hover: #424252;
-    --theme-muted: #9D9DAE;
-    --theme-text: #EEEEF2;
-    --theme-glass: rgba(14, 14, 17, 0.6);
-    --theme-accent: #E5A962;
+    --theme-surface: #0F172A;
+    --theme-card: #1E293B;
+    --theme-border: #334155;
+    --theme-border-hover: #475569;
+    --theme-muted: #94A3B8;
+    --theme-text: #F8FAFC;
+    --theme-text-secondary: #CBD5E1;
+    --theme-glass: rgba(15, 23, 42, 0.6);
+    --theme-accent: #0F172A;
+    --theme-primary: #2DD4BF;
+    --theme-primary-hover: #14B8A6;
+    --theme-secondary: #38BDF8;
+    --theme-secondary-hover: #0EA5E9;
   }
 
   body {
     @apply bg-theme-bg text-theme-text antialiased overflow-x-hidden transition-colors duration-300;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     background-image: 
-      radial-gradient(circle at 10% 20%, rgba(229, 169, 98, 0.04) 0%, transparent 40%),
-      radial-gradient(circle at 90% 80%, rgba(212, 149, 71, 0.03) 0%, transparent 45%);
+      radial-gradient(circle at 10% 20%, rgba(13, 148, 136, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(2, 132, 199, 0.03) 0%, transparent 45%);
     background-attachment: fixed;
   }
 
-  /* Custom Luxury Gold Scrollbars */
+  /* Custom Scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #121217;
+    background: var(--theme-surface);
   }
   ::-webkit-scrollbar-thumb {
-    background: #2A2A36;
+    background: var(--theme-border);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #E5A962;
+    background: var(--theme-primary);
   }
 }
 
-/* Custom Leaflet Map Luxury Charcoal & Gold Styling */
+/* Custom Leaflet Map Styling */
 .leaflet-container {
-  background-color: #121217 !important;
+  background-color: var(--theme-surface) !important;
   font-family: 'Inter', system-ui, sans-serif !important;
 }
 
@@ -74,22 +84,22 @@
 }
 
 .custom-dark-popup .leaflet-popup-tip {
-  background: #181820 !important;
-  border: 1px solid rgba(229, 169, 98, 0.4) !important;
+  background: var(--theme-card) !important;
+  border: 1px solid var(--theme-border) !important;
 }
 
 .custom-dark-popup .leaflet-popup-close-button {
-  color: #9D9DAE !important;
+  color: var(--theme-muted) !important;
   top: 12px !important;
   right: 12px !important;
 }
 
 .custom-dark-popup .leaflet-popup-close-button:hover {
-  color: #E5A962 !important;
+  color: var(--theme-primary) !important;
 }
 
-/* Gold Pulse for Radar Pins */
-@keyframes gold-pulse {
+/* Primary Pulse for Radar Pins */
+@keyframes primary-pulse {
   0% {
     transform: scale(0.95);
     opacity: 0.8;
@@ -104,8 +114,8 @@
   }
 }
 
-.gold-radar-ping {
-  animation: gold-pulse 2.2s infinite ease-in-out;
+.primary-radar-ping {
+  animation: primary-pulse 2.2s infinite ease-in-out;
 }
 
 /* Smooth Fade In */

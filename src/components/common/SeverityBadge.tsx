@@ -20,7 +20,7 @@ export const SeverityBadge: React.FC<SeverityBadgeProps> = ({
       label: 'Low Risk',
     },
     MODERATE: {
-      bg: 'bg-[#2A2315] text-[#E5A962] border-[#E5A962]/40',
+      bg: 'bg-yellow-950/40 text-yellow-500 border-yellow-500/40',
       icon: AlertCircle,
       label: 'Moderate',
     },
@@ -63,21 +63,21 @@ interface StatusBadgeProps {
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' }) => {
   const config: Record<VerificationStatus, { bg: string; icon: React.ElementType; label: string }> = {
     VERIFIED: {
-      bg: 'bg-[#2E2417] text-[#F3C58E] border-[#E5A962]/50 shadow-gold-sm',
+      bg: 'bg-theme-primary/10 text-theme-primary border-theme-primary/50 shadow-primary-sm',
       icon: ShieldCheck,
       label: 'AI Verified',
     },
     PARTIALLY_VERIFIED: {
-      bg: 'bg-[#262016] text-[#E5A962] border-[#E5A962]/40',
+      bg: 'bg-theme-primary/5 text-theme-primary border-theme-primary/40',
       icon: CheckCircle,
       label: 'Corroborated',
     },
     VERIFYING: {
-      bg: 'bg-[#201C14] text-[#E5A962] border-[#E5A962]/30',
+      bg: 'bg-theme-secondary/10 text-theme-secondary border-theme-secondary/30',
       icon: Loader2,
       label: 'Verifying...',
     },
-    REVIEW: {
+    UNDER_REVIEW: {
       bg: 'bg-amber-950/50 text-amber-300 border-amber-500/50',
       icon: Clock,
       label: 'In Review',
@@ -104,7 +104,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' })
     },
   };
 
-  const current = config[status] || config.REVIEW;
+  const current = config[status] || config.UNDER_REVIEW;
   const sizeClasses = {
     sm: 'text-[10px] px-2 py-0.5 gap-1 font-mono font-bold',
     md: 'text-xs px-2.5 py-1 gap-1.5 font-mono font-bold',

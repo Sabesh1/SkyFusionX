@@ -1,6 +1,6 @@
 export type SeverityLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
 
-export type VerificationStatus = 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'REVIEW' | 'SUSPICIOUS' | 'REJECTED' | 'VERIFYING' | 'UNVERIFIED' | 'PROCESSING';
+export type VerificationStatus = 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'UNDER_REVIEW' | 'SUSPICIOUS' | 'REJECTED' | 'VERIFYING' | 'UNVERIFIED' | 'PROCESSING';
 
 export type WeatherEventType = 
   | 'Heavy Rainfall'

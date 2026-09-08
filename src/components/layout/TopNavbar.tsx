@@ -207,7 +207,7 @@ export const TopNavbar: React.FC = () => {
             className="relative p-2 rounded-xl bg-theme-card border border-theme-border/80 hover:border-theme-border-hover text-theme-text transition-colors"
           >
             <Bell className="w-4 h-4 text-theme-muted" />
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 text-slate-950 text-[9px] font-bold flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
               4
             </span>
           </button>

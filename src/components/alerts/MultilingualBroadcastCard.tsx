@@ -137,7 +137,7 @@ export const MultilingualBroadcastCard: React.FC<{ alert: WeatherAlert }> = ({ a
           {isPlayingAudio ? (
             <button
               onClick={handleStopAudio}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-slate-950 border border-red-400 text-xs font-mono font-bold transition-all animate-pulse"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-white border border-red-400 text-xs font-mono font-bold transition-all animate-pulse"
             >
               <VolumeX className="w-4 h-4" />
               <span>STOP AUDIO</span>

@@ -456,14 +456,15 @@ Return only the translated alert.
 English Alert:
 {english_text}
 """
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
         # Initialize within the method to ensure it's loaded
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+        client = genai.Client(api_key=api_key)
         
-        response = await asyncio.to_thread(
-            model.generate_content,
-            prompt
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(temperature=0.0)
         )
         
         if response and response.text:

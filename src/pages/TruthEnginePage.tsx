@@ -153,7 +153,7 @@ export const TruthEnginePage: React.FC = () => {
             >
               <option value="ALL">All Statuses</option>
               <option value="VERIFIED">Verified</option>
-              <option value="REVIEW">Review</option>
+              <option value="UNDER_REVIEW">Review</option>
               <option value="REJECTED">Rejected</option>
             </select>
           </div>

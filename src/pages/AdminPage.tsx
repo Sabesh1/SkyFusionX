@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { apiClient } from '../services/apiClient';
+import { reportApi } from '../services/reportApi';
 import { WeatherReport } from '../types/report';
 export const AdminPage: React.FC = () => {
   const { addToast } = useApp();
@@ -32,8 +33,8 @@ export const AdminPage: React.FC = () => {
     setIsLoading(true);
     // Fetch reports that are UNVERIFIED or UNDER_REVIEW
     const [unverified, underReview] = await Promise.all([
-      apiClient.get<WeatherReport[]>('/api/v1/observations?verification_status=UNVERIFIED'),
-      apiClient.get<WeatherReport[]>('/api/v1/observations?verification_status=UNDER_REVIEW')
+      reportApi.getLiveReports({ status: 'UNVERIFIED' }),
+      reportApi.getLiveReports({ status: 'UNDER_REVIEW' })
     ]);
     
     let combined: WeatherReport[] = [];
@@ -214,7 +215,7 @@ export const AdminPage: React.FC = () => {
 
           <button
             onClick={handleSaveThresholds}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold text-xs font-mono shadow-md transition-all"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs font-mono shadow-md transition-all"
           >
             Apply & Broadcast Policy
           </button>

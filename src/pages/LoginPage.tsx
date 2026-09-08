@@ -18,7 +18,7 @@ export const LoginPage: React.FC = () => {
       formData.append('username', operatorId);
       formData.append('password', passcode);
       
-      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -54,17 +54,17 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-theme-bg text-theme-text flex items-center justify-center p-4 selection:bg-[#E5A962] selection:text-slate-950">
+    <div className="min-h-screen bg-theme-bg text-theme-text flex items-center justify-center p-4 selection:bg-theme-primary selection:text-white">
       <div className="w-full max-w-md p-8 rounded-3xl bg-theme-card border border-theme-border shadow-card-emboss space-y-6">
         <div className="text-center space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E5A962] via-[#D49547] to-[#8C5E28] flex items-center justify-center text-slate-950 mx-auto shadow-gold-glow">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-theme-primary to-theme-primary-hover flex items-center justify-center text-white mx-auto shadow-primary-glow">
             <ShieldCheck className="w-8 h-8 stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="text-xl font-bold font-display text-[#EEEEF2]">
+            <h2 className="text-xl font-bold font-display text-theme-text">
               Operator Authentication
             </h2>
-            <p className="text-xs font-mono text-[#E5A962] mt-0.5">
+            <p className="text-xs font-mono text-theme-primary mt-0.5">
               National Disaster Surveillance Access
             </p>
           </div>
@@ -80,7 +80,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={operatorId}
                 onChange={e => setOperatorId(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-theme-surface border border-theme-border focus:border-[#E5A962] text-theme-text outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-theme-surface border border-theme-border focus:border-theme-primary text-theme-text outline-none transition-colors"
               />
             </div>
           </div>
@@ -94,19 +94,19 @@ export const LoginPage: React.FC = () => {
                 required
                 value={passcode}
                 onChange={e => setPasscode(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-theme-surface border border-theme-border focus:border-[#E5A962] text-theme-text outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-theme-surface border border-theme-border focus:border-theme-primary text-theme-text outline-none transition-colors"
               />
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#1D1B14] border border-[#E5A962]/30 text-[11px] text-[#F3C58E] font-sans flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#E5A962] shrink-0" />
+          <div className="p-3 rounded-2xl bg-theme-primary/10 border border-theme-primary/30 text-[11px] text-theme-primary font-sans flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-theme-primary shrink-0" />
             <span>Demo Mode Enabled: Click below to sign in instantly with test credentials.</span>
           </div>
 
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-gradient-to-r from-[#E5A962] via-[#D49547] to-[#B37B34] text-slate-950 font-bold text-xs font-mono shadow-gold-glow hover:scale-[1.02] transition-all"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-gradient-to-r from-theme-primary to-theme-primary-hover text-white font-bold text-xs font-mono shadow-primary-glow hover:scale-[1.02] transition-all"
           >
             <span>Authorize & Enter</span>
             <ArrowRight className="w-4 h-4" />

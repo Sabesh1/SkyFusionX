@@ -5,7 +5,7 @@ export const RiskLegend: React.FC<{ orientation?: 'horizontal' | 'vertical' }> =
 }) => {
   const levels = [
     { label: 'Low', color: 'bg-emerald-400', ring: 'border-emerald-500/50' },
-    { label: 'Moderate', color: 'bg-[#E5A962]', ring: 'border-[#E5A962]/50' },
+    { label: 'Moderate', color: 'bg-theme-primary', ring: 'border-theme-primary/50' },
     { label: 'High', color: 'bg-amber-400', ring: 'border-amber-500/50' },
     { label: 'Critical', color: 'bg-red-500', ring: 'border-red-500/50' },
   ];

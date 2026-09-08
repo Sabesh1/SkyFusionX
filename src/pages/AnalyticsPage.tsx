@@ -89,14 +89,14 @@ export const AnalyticsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-theme-surface border border-theme-border-hover hover:border-cyan-500 text-theme-text text-xs font-mono transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-theme-surface border border-theme-border-hover hover:border-theme-secondary text-theme-text text-xs font-mono transition-colors"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-400" />
+              <FileSpreadsheet className="w-3.5 h-3.5 text-theme-secondary" />
               <span>Export CSV</span>
             </button>
             <button
               onClick={handleExportReport}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold text-xs font-mono shadow-lg transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-theme-secondary to-theme-secondary-hover text-white font-bold text-xs font-mono shadow-lg transition-all"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Generate Briefing PDF</span>
@@ -112,14 +112,14 @@ export const AnalyticsPage: React.FC = () => {
           <div className="flex items-center justify-between border-b border-theme-border pb-3">
             <div>
               <h3 className="text-xs font-mono uppercase font-bold text-theme-text flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-cyan-400" />
+                <BarChart3 className="w-4 h-4 text-theme-secondary" />
                 Signal Ingestion & AI Verification Trajectory
               </h3>
               <p className="text-[11px] text-theme-muted mt-0.5">
                 Verified signals vs Quarantined suspicious reports over past 24 hours.
               </p>
             </div>
-            <span className="text-[10px] font-mono text-cyan-400">78.1% AI Truth Rate</span>
+            <span className="text-[10px] font-mono text-theme-secondary">78.1% AI Truth Rate</span>
           </div>
 
           <div className="w-full h-[280px]">
@@ -127,29 +127,29 @@ export const AnalyticsPage: React.FC = () => {
               <AreaChart data={reportsOverTime}>
                 <defs>
                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00E5FF" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#00E5FF" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="var(--theme-secondary)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--theme-secondary)" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="colorVer" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="var(--theme-primary)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--theme-primary)" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-                <XAxis dataKey="time" stroke="#64748B" fontSize={11} fontFamily="JetBrains Mono" />
-                <YAxis stroke="#64748B" fontSize={11} fontFamily="JetBrains Mono" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" />
+                <XAxis dataKey="time" stroke="var(--theme-text-secondary)" fontSize={11} fontFamily="JetBrains Mono" />
+                <YAxis stroke="var(--theme-text-secondary)" fontSize={11} fontFamily="JetBrains Mono" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0D121F',
-                    borderColor: '#00E5FF',
+                    backgroundColor: 'var(--theme-surface)',
+                    borderColor: 'var(--theme-secondary)',
                     borderRadius: '8px',
                     fontFamily: 'JetBrains Mono',
                     fontSize: '11px',
                   }}
                 />
-                <Legend wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono' }} />
-                <Area type="monotone" dataKey="total" name="Total Ingested" stroke="#00E5FF" fill="url(#colorTotal)" strokeWidth={2} />
-                <Area type="monotone" dataKey="verified" name="AI Verified" stroke="#10B981" fill="url(#colorVer)" strokeWidth={2} />
+                <Legend wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono', color: 'var(--theme-text)' }} />
+                <Area type="monotone" dataKey="total" name="Total Ingested" stroke="var(--theme-secondary)" fill="url(#colorTotal)" strokeWidth={2} />
+                <Area type="monotone" dataKey="verified" name="AI Verified" stroke="var(--theme-primary)" fill="url(#colorVer)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -182,8 +182,8 @@ export const AnalyticsPage: React.FC = () => {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0D121F',
-                    borderColor: '#334155',
+                    backgroundColor: 'var(--theme-surface)',
+                    borderColor: 'var(--theme-border)',
                     borderRadius: '8px',
                     fontFamily: 'JetBrains Mono',
                     fontSize: '11px',
@@ -218,19 +218,19 @@ export const AnalyticsPage: React.FC = () => {
           <div className="w-full h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stateWiseEvents} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-                <XAxis type="number" stroke="#64748B" fontSize={11} fontFamily="JetBrains Mono" />
-                <YAxis dataKey="state" type="category" stroke="#64748B" fontSize={11} fontFamily="JetBrains Mono" width={90} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" />
+                <XAxis type="number" stroke="var(--theme-text-secondary)" fontSize={11} fontFamily="JetBrains Mono" />
+                <YAxis dataKey="state" type="category" stroke="var(--theme-text-secondary)" fontSize={11} fontFamily="JetBrains Mono" width={90} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0D121F',
-                    borderColor: '#334155',
+                    backgroundColor: 'var(--theme-surface)',
+                    borderColor: 'var(--theme-border)',
                     borderRadius: '8px',
                     fontFamily: 'JetBrains Mono',
                     fontSize: '11px',
                   }}
                 />
-                <Bar dataKey="reports" name="Ground Reports" fill="#00E5FF" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="reports" name="Ground Reports" fill="var(--theme-secondary)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -250,14 +250,14 @@ export const AnalyticsPage: React.FC = () => {
               <div key={src.source} className="p-3 rounded-lg bg-theme-surface/60 border border-theme-border space-y-1.5">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-theme-text">{src.source}</span>
-                  <span className="text-cyan-400 font-bold">{src.count.toLocaleString()} pings</span>
+                  <span className="text-theme-secondary font-bold">{src.count.toLocaleString()} pings</span>
                 </div>
                 <div className="w-full h-1.5 bg-theme-card rounded-full overflow-hidden">
-                  <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${(src.count / 7000) * 100}%` }} />
+                  <div className="h-full bg-theme-secondary rounded-full" style={{ width: `${(src.count / 7000) * 100}%` }} />
                 </div>
                 <div className="flex justify-between text-[10px] text-theme-muted">
                   <span>Reliability Baseline:</span>
-                  <span className="text-emerald-400 font-bold">{src.trustAvg}% Trust Average</span>
+                  <span className="text-theme-primary font-bold">{src.trustAvg}% Trust Average</span>
                 </div>
               </div>
             ))}

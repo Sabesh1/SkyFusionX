@@ -6,13 +6,13 @@ export type AlertDeliveryChannel = 'DASHBOARD' | 'SMS_GATEWAY' | 'MOBILE_APP_PUS
 
 export interface MultilingualMessage {
   en: string;
-  hi: string;
-  ta: string;
-  te: string;
-  kn: string;
-  ml: string;
-  bn: string;
-  mr: string;
+  hi?: string;
+  ta?: string;
+  te?: string;
+  kn?: string;
+  ml?: string;
+  bn?: string;
+  mr?: string;
 }
 
 export interface WeatherAlert {

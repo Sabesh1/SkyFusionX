@@ -51,18 +51,18 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-theme-bg text-theme-text flex flex-col justify-between selection:bg-[#E5A962] selection:text-slate-950 font-sans">
+    <div className="min-h-screen bg-theme-bg text-theme-text flex flex-col justify-between selection:bg-theme-primary selection:text-white font-sans">
       {/* Top Floating Navigation Pill */}
       <header className="px-6 py-5 max-w-7xl w-full mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E5A962] via-[#D49547] to-[#8C5E28] flex items-center justify-center text-slate-950 shadow-gold-glow">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-theme-primary to-theme-primary-hover flex items-center justify-center text-white shadow-primary-glow">
             <ShieldCheck className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
-            <span className="font-display font-bold text-base tracking-tight text-[#EEEEF2]">
+            <span className="font-display font-bold text-base tracking-tight text-theme-text">
               AI Weather Truth Engine
             </span>
-            <span className="block text-[10px] font-mono text-[#E5A962] tracking-wider uppercase font-semibold">
+            <span className="block text-[10px] font-mono text-theme-primary tracking-wider uppercase font-semibold">
               National Big Data Analytics
             </span>
           </div>
@@ -77,7 +77,7 @@ export const LandingPage: React.FC = () => {
           </button>
           <button
             onClick={handleLaunch}
-            className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-to-r from-[#E5A962] to-[#B37B34] hover:from-[#F3C58E] hover:to-[#C88A3B] text-slate-950 text-xs font-mono font-bold transition-all shadow-gold-glow"
+            className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-to-r from-theme-primary to-theme-primary-hover hover:brightness-110 text-white text-xs font-mono font-bold transition-all shadow-primary-glow"
           >
             <span>Enter Command Center</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -87,14 +87,14 @@ export const LandingPage: React.FC = () => {
 
       {/* Hero Section */}
       <main className="max-w-5xl w-full mx-auto px-6 py-16 text-center space-y-8 my-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#201A12] border border-[#E5A962]/50 text-[#F3C58E] text-xs font-mono font-semibold shadow-gold-sm animate-fadeIn">
-          <Sparkles className="w-4 h-4 text-[#E5A962]" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-theme-primary/10 border border-theme-primary/50 text-theme-primary text-xs font-mono font-semibold shadow-primary-sm animate-fadeIn">
+          <Sparkles className="w-4 h-4 text-theme-primary" />
           <span>Real-Time Weather Intelligence for a Safer India</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display tracking-tight text-[#EEEEF2] leading-[1.1]">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display tracking-tight text-theme-text leading-[1.1]">
           Incontrovertible Truth in <br />
-          <span className="bg-gradient-to-r from-[#F9ECD9] via-[#E5A962] to-[#B87B32] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-theme-secondary to-theme-primary bg-clip-text text-transparent">
             Extreme Weather Crises
           </span>
         </h1>
@@ -107,7 +107,7 @@ export const LandingPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <button
             onClick={handleLaunch}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[#E5A962] via-[#D49547] to-[#B37B34] text-slate-950 font-bold text-sm font-mono shadow-gold-glow hover:scale-105 transition-all"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-theme-primary to-theme-primary-hover text-white font-bold text-sm font-mono shadow-primary-glow hover:scale-105 transition-all"
           >
             <span>Launch Live Dashboard</span>
             <ArrowRight className="w-4 h-4" />
@@ -117,7 +117,7 @@ export const LandingPage: React.FC = () => {
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-theme-surface hover:bg-theme-surface/80 border border-theme-border text-theme-text text-sm font-mono transition-all"
           >
             <span>Inspect Truth Engine</span>
-            <ChevronRight className="w-4 h-4 text-[#E5A962]" />
+            <ChevronRight className="w-4 h-4 text-theme-primary" />
           </button>
         </div>
 
@@ -126,12 +126,12 @@ export const LandingPage: React.FC = () => {
           {featureCards.map((card, idx) => (
             <div
               key={idx}
-              className="p-5 rounded-3xl bg-theme-card border border-theme-border hover:border-[#E5A962]/50 transition-all shadow-card-emboss space-y-3 group"
+              className="p-5 rounded-3xl bg-theme-card border border-theme-border hover:border-theme-primary/50 transition-all shadow-card-emboss space-y-3 group"
             >
-              <div className="w-10 h-10 rounded-2xl bg-theme-surface border border-theme-border-hover text-[#E5A962] flex items-center justify-center group-hover:bg-[#322618] group-hover:border-[#E5A962]/50 transition-colors">
-                <card.icon className="w-5 h-5 text-[#E5A962]" />
+              <div className="w-10 h-10 rounded-2xl bg-theme-surface border border-theme-border-hover text-theme-primary flex items-center justify-center group-hover:bg-theme-primary/10 group-hover:border-theme-primary/50 transition-colors">
+                <card.icon className="w-5 h-5 text-theme-primary" />
               </div>
-              <h3 className="font-bold font-display text-sm text-[#F3D9B5]">{card.title}</h3>
+              <h3 className="font-bold font-display text-sm text-theme-text-secondary">{card.title}</h3>
               <p className="text-xs text-theme-muted font-sans leading-relaxed">{card.description}</p>
             </div>
           ))}

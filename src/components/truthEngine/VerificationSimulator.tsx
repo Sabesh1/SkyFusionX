@@ -64,13 +64,13 @@ export const VerificationSimulator: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme-border/80 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#2A2016] text-[#E5A962] border border-[#E5A962]/40 text-[10px] font-mono font-bold uppercase">
+            <span className="px-2.5 py-0.5 rounded-full bg-theme-primary/10 text-theme-primary border border-theme-primary/40 text-[10px] font-mono font-bold uppercase">
               Interactive Lab
             </span>
             <span className="font-mono text-xs text-theme-muted">Bayesian Real-Time Simulator</span>
           </div>
-          <h3 className="text-lg font-bold font-display text-[#EEEEF2] mt-1 flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-[#E5A962]" />
+          <h3 className="text-lg font-bold font-display text-theme-text mt-1 flex items-center gap-2">
+            <Cpu className="w-5 h-5 text-theme-primary" />
             AI Truth Verification Simulation Sandbox
           </h3>
           <p className="text-xs text-theme-muted font-sans mt-0.5">
@@ -82,7 +82,7 @@ export const VerificationSimulator: React.FC = () => {
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => handlePreset('high')}
-            className="px-3 py-1.5 rounded-full bg-[#2E2417] hover:bg-[#3D2E1C] border border-[#E5A962]/60 text-[#F3C58E] text-xs font-mono font-bold transition-all shadow-gold-sm"
+            className="px-3 py-1.5 rounded-full bg-theme-primary/10 hover:bg-theme-primary/20 border border-theme-primary/60 text-theme-primary text-xs font-mono font-bold transition-all shadow-primary-sm"
           >
             Verified Case (94%)
           </button>
@@ -106,7 +106,7 @@ export const VerificationSimulator: React.FC = () => {
         {/* Left 7 Cols: Sliders */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono uppercase font-bold text-[#E5A962]">
+            <span className="text-xs font-mono uppercase font-bold text-theme-primary">
               Adjust 7 Bayesian Input Weights:
             </span>
             <span className="text-[10px] font-mono text-theme-muted">Interactive Controls</span>
@@ -129,7 +129,7 @@ export const VerificationSimulator: React.FC = () => {
           />
 
           <div className="w-full p-4 rounded-xl bg-theme-bg border border-theme-border/80 text-xs font-sans text-theme-text leading-relaxed text-left">
-            <span className="font-mono text-[#E5A962] font-bold uppercase block mb-1">
+            <span className="font-mono text-theme-primary font-bold uppercase block mb-1">
               AI Verification Verdict:
             </span>
             {calculation.verdict === 'VERIFIED'
@@ -141,10 +141,10 @@ export const VerificationSimulator: React.FC = () => {
 
           <div className="w-full grid grid-cols-2 gap-2 text-[10px] font-mono text-theme-muted">
             <div className="p-2 rounded-lg bg-theme-bg border border-theme-border/80">
-              Confidence: <strong className="text-[#E5A962]">{calculation.confidenceLevel}</strong>
+              Confidence: <strong className="text-theme-primary">{calculation.confidenceLevel}</strong>
             </div>
             <div className="p-2 rounded-lg bg-theme-bg border border-theme-border/80">
-              Compute Latency: <strong className="text-emerald-400">18ms</strong>
+              Compute Latency: <strong className="text-theme-primary">18ms</strong>
             </div>
           </div>
         </div>
