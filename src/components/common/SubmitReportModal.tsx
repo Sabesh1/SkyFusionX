@@ -263,19 +263,46 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
                         }
                         setIsGettingLocation(true);
                         navigator.geolocation.getCurrentPosition(
-                          (pos) => {
-                            setIsGettingLocation(false);
-                            setSelectedLocation({
-                              name: 'Current Location',
-                              state: 'Unknown',
-                              lat: pos.coords.latitude,
-                              lng: pos.coords.longitude,
-                            });
-                            setLocationQuery('Current Location');
-                            setLocationAccuracy(pos.coords.accuracy);
-                            setLocationTimestamp(pos.timestamp);
-                            addToast({ type: 'success', title: 'Location Found', message: `Accuracy: ±${Math.round(pos.coords.accuracy)}m` });
-                          },
+                          (async (pos) => {
+                            try {
+                              const res = await apiClient.get<any>(`/api/v1/locations/reverse?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`);
+                              setIsGettingLocation(false);
+                              if (res && res.name) {
+                                setSelectedLocation({
+                                  name: res.name,
+                                  state: res.state,
+                                  district: res.district,
+                                  lat: pos.coords.latitude,
+                                  lng: pos.coords.longitude,
+                                });
+                                setLocationQuery(`${res.name}, ${res.state}`);
+                                addToast({ type: 'success', title: 'Location Found', message: `Accuracy: ±${Math.round(pos.coords.accuracy)}m (${res.name})` });
+                              } else {
+                                setSelectedLocation({
+                                  name: 'Current Location',
+                                  state: 'Unknown',
+                                  lat: pos.coords.latitude,
+                                  lng: pos.coords.longitude,
+                                });
+                                setLocationQuery('Current Location');
+                                addToast({ type: 'success', title: 'Location Found', message: `Accuracy: ±${Math.round(pos.coords.accuracy)}m` });
+                              }
+                              setLocationAccuracy(pos.coords.accuracy);
+                              setLocationTimestamp(pos.timestamp);
+                            } catch (err) {
+                              setIsGettingLocation(false);
+                              setSelectedLocation({
+                                name: 'Current Location',
+                                state: 'Unknown',
+                                lat: pos.coords.latitude,
+                                lng: pos.coords.longitude,
+                              });
+                              setLocationQuery('Current Location');
+                              setLocationAccuracy(pos.coords.accuracy);
+                              setLocationTimestamp(pos.timestamp);
+                              addToast({ type: 'success', title: 'Location Found', message: `Accuracy: ±${Math.round(pos.coords.accuracy)}m (Offline)` });
+                            }
+                          }),
                           (err) => {
                             setIsGettingLocation(false);
                             addToast({ type: 'error', title: 'Location Error', message: err.message });

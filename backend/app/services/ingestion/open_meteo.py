@@ -115,6 +115,6 @@ class OpenMeteoAdapter(BaseIngestionAdapter):
             "event_type": event_type,
             "severity": severity,
             "verification_status": "VERIFIED", # System API is trusted
-            "trust_score": 100.0,
+            "trust_score": float(90 + severity + (loc["lat"] % 5)),
             "raw_payload": raw_data
         }

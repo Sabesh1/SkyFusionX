@@ -55,3 +55,44 @@ async def search_locations(q: str):
         logger.error(f"[Location API] Error fetching from Open-Meteo: {e}")
         # Return empty list on failure so UI doesn't crash
         return []
+
+@router.get("/reverse", response_model=Dict[str, Any])
+async def reverse_geocode(lat: float, lng: float):
+    logger.info(f"[Location API] Reverse geocoding for lat={lat}, lng={lng}")
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get("https://nominatim.openstreetmap.org/reverse", params={
+                "lat": lat,
+                "lon": lng,
+                "format": "json",
+                "addressdetails": 1
+            }, headers={"User-Agent": "SkyFusionX/1.0"})
+            resp.raise_for_status()
+            data = resp.json()
+
+        address = data.get("address", {})
+        
+        # Nominatim provides various granularity levels
+        city = address.get("city") or address.get("town") or address.get("village") or address.get("suburb") or "Unknown"
+        district = address.get("county") or address.get("state_district") or city
+        state = address.get("state") or "Unknown"
+        
+        return {
+            "name": city,
+            "district": district,
+            "state": state,
+            "latitude": lat,
+            "longitude": lng,
+            "display_name": data.get("display_name", "")
+        }
+    except Exception as e:
+        logger.error(f"[Location API] Error fetching from Nominatim: {e}")
+        # Fallback to unknown if API fails
+        return {
+            "name": "Current Location",
+            "district": "Unknown",
+            "state": "Unknown",
+            "latitude": lat,
+            "longitude": lng,
+            "display_name": "Current Location"
+        }

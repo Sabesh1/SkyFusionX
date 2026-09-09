@@ -67,6 +67,20 @@ class GeminiObservationResponse(BaseModel):
     reason: str = Field(description="Short human-readable explanation based on evidence provided.")
 
 
+class CopilotIntentParams(BaseModel):
+    location: Optional[str] = Field(None, description="The city, state, or region mentioned")
+    event_type: Optional[str] = Field(None, description="Type of weather event, e.g. FLOOD, FIRE")
+    time_range: Optional[str] = Field(None, description="Time range, e.g. recent, today, last 6 hours")
+    severity: Optional[str] = Field(None, description="Severity or risk level, e.g. CRITICAL, HIGH")
+    trust_score: Optional[str] = Field(None, description="Trust score constraint, e.g. low, high")
+    verification_status: Optional[str] = Field(None, description="e.g. REQUIRES_HUMAN_REVIEW, REJECTED, VERIFIED")
+    limit: int = Field(10, description="Number of results to fetch")
+
+class CopilotIntent(BaseModel):
+    intent: str = Field(description="Must be one of: RECENT_EVENTS, RECENT_REPORTS, EVENTS_BY_LOCATION, EVENTS_BY_TYPE, HIGH_RISK_EVENTS, LOW_TRUST_REPORTS, HUMAN_VERIFICATION_QUEUE, REPORT_DETAILS, EVENT_DETAILS, PLATFORM_STATISTICS, EVENT_TREND, EXTERNAL_WEATHER, MIXED_WEATHER_ANALYSIS")
+    parameters: CopilotIntentParams
+
+
 class GeminiService:
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
@@ -320,6 +334,42 @@ class GeminiService:
         except Exception as e:
             logger.error(f"[GEMINI] operation=copilot_chat status=error error='{e}'")
             return "An unexpected error occurred. Please try again."
+
+    # ─── Intent Extraction ─────────────────────────────────────────────────────
+
+    async def extract_copilot_intent(
+        self,
+        query: str,
+        history: List[Dict[str, str]] = None
+    ) -> Optional[CopilotIntent]:
+        if not self.client:
+            return None
+            
+        system_instruction = (
+            "You are an Intent Parser for a Weather Truth Engine.\n"
+            "Your job is to parse the user's natural language question into a structured intent and extract parameters.\n"
+            "If the user is asking about current external weather forecasts/conditions, use EXTERNAL_WEATHER.\n"
+            "If they ask about both internal reports AND external weather, use MIXED_WEATHER_ANALYSIS.\n"
+            "If they ask about platform data (events, reports, alerts, verification, trust score), use one of the internal intents.\n"
+            "Extract locations correctly (e.g. Chennai, Tamil Nadu). Do NOT extract generic words like 'events' or 'today' as locations.\n"
+            "Use the conversation history if the user's query relies on a previous location context.\n"
+        )
+        
+        history_text = ""
+        if history:
+            history_text = "\n".join([f"{m['sender']}: {m['text']}" for m in history])
+            
+        prompt = f"<HISTORY>\n{history_text}\n</HISTORY>\n\n<QUERY>\n{query}\n</QUERY>"
+        
+        config = types.GenerateContentConfig(
+            system_instruction=system_instruction,
+            response_mime_type="application/json",
+            response_schema=CopilotIntent,
+            temperature=0.0
+        )
+        
+        return await self._call_gemini_structured(prompt, config)
+
 
     # ─── Legacy simple method (kept for compatibility) ─────────────────────────
 

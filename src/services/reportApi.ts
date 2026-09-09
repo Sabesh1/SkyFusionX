@@ -56,6 +56,9 @@ export const reportApi = {
         },
         aiExplanation: br.verification_assessment || `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
         aiStatus: (() => {
+          if (br.verification_status === 'VERIFIED') return 'AI VERIFIED';
+          if (br.verification_status === 'REJECTED') return 'AI FLAGGED';
+          if (br.verification_status === 'UNDER_REVIEW') return 'HUMAN REVIEW REQUIRED';
           if (br.verification_status === 'PROCESSING') return 'PROCESSING';
           if (br.gemini_analyzed === true) return 'GEMINI ANALYZED';
           if (br.model_version?.includes('gemini')) return 'GEMINI ANALYZED';
@@ -136,7 +139,14 @@ export const reportApi = {
           satelliteCorrelation: 80,
         },
         aiExplanation: br.verification_assessment || `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
-        aiStatus: br.verification_status === 'PROCESSING' ? 'PROCESSING' : (br.gemini_analyzed ? 'GEMINI ANALYZED' : 'FALLBACK'),
+        aiStatus: (() => {
+          if (br.verification_status === 'VERIFIED') return 'AI VERIFIED';
+          if (br.verification_status === 'REJECTED') return 'AI FLAGGED';
+          if (br.verification_status === 'UNDER_REVIEW') return 'HUMAN REVIEW REQUIRED';
+          if (br.verification_status === 'PROCESSING') return 'PROCESSING';
+          if (br.gemini_analyzed) return 'GEMINI ANALYZED';
+          return 'FALLBACK';
+        })(),
         modelVersion: br.model_version,
         mlEventType: br.ml_event_type,
         mlConfidence: br.ml_confidence,
@@ -256,7 +266,7 @@ export const reportApi = {
         source: 'Citizen App',
         sourceHandle: '@mock_user',
         sourceReputation: 50,
-        trustScore: 40,
+        trustScore: 70 + (Date.now() % 28),
         status: 'UNDER_REVIEW',
         severity: 'MODERATE',
         timestamp: new Date().toISOString(),
