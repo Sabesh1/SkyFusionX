@@ -170,22 +170,9 @@ export const DemoModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // Simulated live report generator during Demo Mode
+  // Simulated live report generator during Demo Mode (Removed in favor of Backend Demo Streamer)
   useEffect(() => {
-    if (!isDemoMode) return;
-
-    const interval = setInterval(async () => {
-      const newReport = await reportApi.generateMockLiveReport();
-      if (newReport) {
-        setLiveReports(prev => [newReport, ...prev.slice(0, 20)]);
-        setTotalReportCounter(prev => prev + 1);
-        if (newReport.status === 'VERIFIED') {
-          setVerifiedCounter(prev => prev + 1);
-        }
-      }
-    }, 35000);
-
-    return () => clearInterval(interval);
+    // Backend handles the demo stream canonically via SSE.
   }, [isDemoMode]);
 
   return (

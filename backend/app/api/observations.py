@@ -510,7 +510,27 @@ async def list_observations(
     has_media: Optional[bool] = None,
     db: Session = Depends(get_db)
 ):
+    from sqlalchemy import or_, and_
+    from app.services.demo_stream_manager import demo_manager
+
     query = db.query(Observation)
+    
+    if demo_manager.streamed_ids:
+        query = query.filter(
+            or_(
+                Observation.is_mock == False,
+                Observation.is_mock.is_(None),
+                and_(Observation.is_mock == True, Observation.id.in_(demo_manager.streamed_ids))
+            )
+        )
+    else:
+        query = query.filter(
+            or_(
+                Observation.is_mock == False,
+                Observation.is_mock.is_(None)
+            )
+        )
+        
     if state and state != "ALL":
         query = query.filter(Observation.state == state)
     if event_type and event_type != "ALL":

@@ -54,3 +54,15 @@ async def push_to_clients(msg: dict):
         
     for q in list(clients):
         await q.put(msg)
+
+from app.services.demo_stream_manager import demo_manager
+
+@router.post("/demo/start")
+async def start_demo_stream():
+    demo_manager.start()
+    return {"status": "started", "queue_size": len(demo_manager.queue)}
+
+@router.post("/demo/stop")
+async def stop_demo_stream():
+    demo_manager.stop()
+    return {"status": "stopped"}

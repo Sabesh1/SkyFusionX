@@ -8,12 +8,12 @@
     --theme-bg: #F8FAFC;
     --theme-surface: #FFFFFF;
     --theme-card: #F1F5F9;
-    --theme-border: #E2E8F0;
-    --theme-border-hover: #CBD5E1;
-    --theme-muted: #64748B;
-    --theme-text: #0F172A;
-    --theme-text-secondary: #475569;
-    --theme-glass: rgba(255, 255, 255, 0.7);
+    --theme-border: #CBD5E1;
+    --theme-border-hover: #94A3B8;
+    --theme-muted: #334155;
+    --theme-text: #020617;
+    --theme-text-secondary: #1E293B;
+    --theme-glass: rgba(255, 255, 255, 0.85);
     --theme-accent: #1E293B;
     --theme-primary: #0D9488;
     --theme-primary-hover: #0F766E;
@@ -62,6 +62,45 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: var(--theme-primary);
+  }
+}
+
+@layer utilities {
+  /* Force high-contrast text colors in Light Mode since the app heavily uses -300/-400 tailwind classes designed for Dark Mode */
+  :root:not(.dark) .text-cyan-200,
+  :root:not(.dark) .text-cyan-300, 
+  :root:not(.dark) .text-cyan-400 { 
+    color: #0369a1 !important; /* sky-700 */
+  }
+  
+  :root:not(.dark) .text-emerald-200,
+  :root:not(.dark) .text-emerald-300, 
+  :root:not(.dark) .text-emerald-400 { 
+    color: #047857 !important; /* emerald-700 */
+  }
+  
+  :root:not(.dark) .text-amber-200,
+  :root:not(.dark) .text-amber-300, 
+  :root:not(.dark) .text-amber-400 { 
+    color: #b45309 !important; /* amber-700 */
+  }
+  
+  :root:not(.dark) .text-red-200,
+  :root:not(.dark) .text-red-300, 
+  :root:not(.dark) .text-red-400 { 
+    color: #b91c1c !important; /* red-700 */
+  }
+  
+  :root:not(.dark) .text-purple-200,
+  :root:not(.dark) .text-purple-300, 
+  :root:not(.dark) .text-purple-400 { 
+    color: #7e22ce !important; /* purple-700 */
+  }
+
+  :root:not(.dark) .text-blue-200,
+  :root:not(.dark) .text-blue-300, 
+  :root:not(.dark) .text-blue-400 { 
+    color: #1d4ed8 !important; /* blue-700 */
   }
 }
 

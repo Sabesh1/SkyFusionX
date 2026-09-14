@@ -37,7 +37,7 @@ export const LiveIntelligencePage: React.FC = () => {
   const [processingCount, setProcessingCount] = useState(0);
   const processingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { liveReports } = useDemoMode();
-  const { setSelectedReport } = useApp();
+  const { setSelectedReport, addToast } = useApp();
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -200,6 +200,15 @@ export const LiveIntelligencePage: React.FC = () => {
         }
       });
 
+      evtSource.addEventListener('demo_stream_complete', (e: any) => {
+        setIsStreamPaused(true);
+        addToast({
+          type: 'success',
+          title: 'Demo Stream Complete',
+          message: 'All queued demo reports have been successfully released.',
+        });
+      });
+
       return () => {
         evtSource.close();
       };
@@ -289,7 +298,17 @@ export const LiveIntelligencePage: React.FC = () => {
               <span>{isProcessingActive ? `AI ENGINE RUNNING (${processingCount} queued)` : 'START AI PROCESSING'}</span>
             </button>
             <button
-              onClick={() => setIsStreamPaused(!isStreamPaused)}
+              onClick={async () => {
+                const newState = !isStreamPaused;
+                setIsStreamPaused(newState);
+                if (!newState) {
+                  await apiClient.post('/api/v1/events/demo/start', {});
+                  addToast({ type: 'info', title: 'Streaming Resumed', message: 'Demo reports will be released sequentially.' });
+                } else {
+                  await apiClient.post('/api/v1/events/demo/stop', {});
+                  addToast({ type: 'warning', title: 'Streaming Paused', message: 'Demo release has been halted.' });
+                }
+              }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-mono font-bold transition-all ${isStreamPaused
                 ? 'bg-amber-950/40 border-amber-500/40 text-amber-300'
                 : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
