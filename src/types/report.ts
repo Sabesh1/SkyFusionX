@@ -40,6 +40,8 @@ export interface WeatherReport {
   status: VerificationStatus;
   severity: SeverityLevel;
   timestamp: string;
+  isMock?: boolean;
+  sourceType?: string;
   evidence?: WeatherEvidence[];
   verificationFactors: VerificationFactors;
   aiExplanation: string;

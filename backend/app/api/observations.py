@@ -515,21 +515,7 @@ async def list_observations(
 
     query = db.query(Observation)
     
-    if demo_manager.streamed_ids:
-        query = query.filter(
-            or_(
-                Observation.is_mock == False,
-                Observation.is_mock.is_(None),
-                and_(Observation.is_mock == True, Observation.id.in_(demo_manager.streamed_ids))
-            )
-        )
-    else:
-        query = query.filter(
-            or_(
-                Observation.is_mock == False,
-                Observation.is_mock.is_(None)
-            )
-        )
+    # No longer filtering out is_mock=True records so that all background-ingested simulated sources appear on page load.
         
     if state and state != "ALL":
         query = query.filter(Observation.state == state)

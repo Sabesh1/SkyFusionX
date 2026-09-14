@@ -230,14 +230,18 @@ export const LiveIntelligencePage: React.FC = () => {
       else if (filterStatus === 'SUSPICIOUS') matchesStatus = r.trustScore < 50; // simple heuristic
     }
 
-    // Source
+    // Source — filter using the normalized sourceType field
     let matchesSource = true;
     if (filterSource !== 'ALL') {
-      const src = r.source.toLowerCase();
-      if (filterSource === 'CITIZEN') matchesSource = src.includes('citizen');
-      else if (filterSource === 'SOCIAL') matchesSource = src.includes('social') || src.includes('twitter');
-      else if (filterSource === 'API') matchesSource = src.includes('api') || src.includes('sensor');
-      else if (filterSource === 'WEB') matchesSource = src.includes('web');
+      const st = (r.sourceType || '').toLowerCase();
+      const src = (r.source || '').toLowerCase();
+      if (filterSource === 'CITIZEN') matchesSource = st === 'citizen' || src.includes('citizen');
+      else if (filterSource === 'IMD') matchesSource = st === 'imd' || src.includes('imd');
+      else if (filterSource === 'SOCIAL') matchesSource = st === 'social_media' || src.includes('social') || src.includes('twitter');
+      else if (filterSource === 'API') matchesSource = st === 'weather_api' || src.includes('open-meteo') || src.includes('weather api');
+      else if (filterSource === 'PUBLIC') matchesSource = st === 'public_dataset' || src.includes('aws network') || src.includes('sensor');
+      else if (filterSource === 'WEB') matchesSource = st === 'web' || src.includes('news');
+      else if (filterSource === 'SATELLITE') matchesSource = st === 'satellite' || src.includes('radar') || src.includes('insat') || src.includes('dwr');
     }
 
     // Event
@@ -351,10 +355,13 @@ export const LiveIntelligencePage: React.FC = () => {
             className="px-3 py-1.5 rounded-lg bg-theme-surface border border-theme-border text-theme-text focus:border-cyan-500 outline-none"
           >
             <option value="ALL">All Sources</option>
-            <option value="CITIZEN">Citizen Report</option>
+            <option value="CITIZEN">Citizen Reports</option>
+            <option value="IMD">IMD</option>
             <option value="SOCIAL">Social Media</option>
-            <option value="API">Weather API</option>
-            <option value="WEB">Web Source</option>
+            <option value="API">Weather APIs</option>
+            <option value="PUBLIC">Public Datasets</option>
+            <option value="WEB">Websites / News</option>
+            <option value="SATELLITE">Satellite / Radar</option>
           </select>
 
           <select
@@ -460,6 +467,11 @@ export const LiveIntelligencePage: React.FC = () => {
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
                   LIVE
                 </span>
+                {report.isMock && (
+                  <span className="px-2 py-0.5 rounded bg-slate-800/80 text-slate-400 border border-slate-600/50 text-[10px] font-mono font-bold">
+                    Demo/Simulated
+                  </span>
+                )}
                 <span className="font-mono text-xs text-theme-muted">
                   {new Date(report.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                 </span>
@@ -485,8 +497,17 @@ export const LiveIntelligencePage: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 pt-1">
-              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${report.aiStatus === 'GEMINI ANALYZED' ? 'bg-purple-950/60 text-purple-400 border-purple-500/40' : report.aiStatus === 'PROCESSING' ? 'bg-amber-950/60 text-amber-400 border-amber-500/40' : report.aiStatus === 'FAILED' ? 'bg-red-950/60 text-red-400 border-red-500/40' : 'bg-theme-surface/60 text-theme-muted border-slate-500/40'}`}>
-                AI EVENT: {report.aiStatus === 'PROCESSING' ? 'PROCESSING...' : (report.mlEventType ? `${report.mlEventType} (${report.mlConfidence ? Math.round(report.mlConfidence * 100) : '--'}%)` : 'Not available')}
+              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                report.aiStatus === 'GEMINI ANALYZED' ? 'bg-purple-950/60 text-purple-400 border-purple-500/40' :
+                report.aiStatus === 'ML ANALYZED' ? 'bg-blue-950/60 text-blue-400 border-blue-500/40' :
+                report.aiStatus === 'TELEMETRY OBSERVATION' ? 'bg-sky-950/60 text-sky-400 border-sky-500/40' :
+                report.aiStatus === 'OFFICIAL BULLETIN' ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/40' :
+                report.aiStatus === 'REMOTE SENSING' ? 'bg-indigo-950/60 text-indigo-400 border-indigo-500/40' :
+                report.aiStatus === 'HUMAN REVIEW REQUIRED' || report.aiStatus === 'AWAITING ANALYSIS' ? 'bg-amber-950/60 text-amber-400 border-amber-500/40' :
+                report.aiStatus === 'AI FLAGGED' ? 'bg-red-950/60 text-red-400 border-red-500/40' :
+                'bg-theme-surface/60 text-theme-muted border-slate-500/40'
+              }`}>
+                AI EVENT: {report.mlEventType ? `${report.mlEventType} (${report.mlConfidence ? Math.round(report.mlConfidence * 100) : '--'}%)` : report.aiStatus}
               </span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${report.verificationRecommendation === 'HIGH_CONFIDENCE' ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/40' : report.verificationRecommendation === 'REQUIRES_HUMAN_REVIEW' ? 'bg-amber-950/60 text-amber-400 border-amber-500/40' : report.verificationRecommendation ? 'bg-red-950/60 text-red-400 border-red-500/40' : 'bg-theme-surface text-theme-muted border-theme-border-hover'}`}>
                 AI REC: {report.verificationRecommendation || '—'}

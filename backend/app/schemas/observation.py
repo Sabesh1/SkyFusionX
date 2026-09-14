@@ -19,6 +19,7 @@ class ObservationCreate(BaseModel):
 class ObservationResponse(ObservationCreate):
     id: str
     ingested_at: datetime
+    source_type: Optional[str] = None
     event_type: Optional[str] = None
     severity: Optional[int] = None
     trust_score: Optional[float] = None

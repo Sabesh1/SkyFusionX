@@ -532,21 +532,21 @@ export const SubmitReportModal: React.FC<SubmitReportModalProps> = ({ isOpen, on
           {/* Verification Result State */}
           {verifiedReport && (
             <div className="space-y-5 text-center py-4 animate-fadeIn">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                <CheckCircle2 className="w-8 h-8" />
-              </div>
+                  <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
 
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold">
-                  <span>TRUST SCORE: {verifiedReport.trustScore}% ({verifiedReport.status})</span>
-                </div>
-                <h3 className="text-base font-bold text-theme-text font-display mt-2">
-                  Report Successfully Ingested into National Grid
-                </h3>
-                <p className="text-xs text-theme-text font-sans max-w-md mx-auto leading-relaxed mt-2 p-2 bg-theme-surface border border-theme-border-hover rounded-lg">
-                  <span className="font-bold block mb-1">AI Evidence Assessment:</span>
-                  {verifiedReport.geminiEvidence?.assessment || 'No AI assessment available.'}
-                </p>
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold">
+                      <span>TRUST SCORE: {verifiedReport.trustScore}% ({verifiedReport.status})</span>
+                    </div>
+                    <h3 className="text-base font-bold text-theme-text font-display mt-2">
+                      Report Successfully Ingested into National Grid
+                    </h3>
+                    <p className="text-xs text-theme-text font-sans max-w-md mx-auto leading-relaxed mt-2 p-2 bg-theme-surface border border-theme-border-hover rounded-lg">
+                      <span className="font-bold block mb-1">AI Evidence Assessment:</span>
+                      {verifiedReport.geminiEvidence?.assessment || 'No AI assessment available.'}
+                    </p>
                 {verifiedReport.imageAnalyzed && (
                   <p className="text-[10px] text-cyan-400 font-mono mt-2 flex items-center justify-center gap-1">
                     <Camera className="w-3 h-3" /> Image analyzed successfully

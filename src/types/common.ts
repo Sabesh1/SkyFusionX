@@ -21,7 +21,14 @@ export type SourceType =
   | 'Drone Recon'
   | 'Official Agency'
   | 'Open-Meteo'
-  | 'Citizen App';
+  | 'Citizen App'
+  | 'Citizen Mobile App'
+  | 'IMD Official'
+  | 'Govt AWS Network'
+  | 'Doppler Weather Radar'
+  | 'News Aggregator'
+  | 'Twitter #IMD'
+  | string; // Allow any backend source name
 
 export type SupportedLanguage = 
   | 'en' // English
