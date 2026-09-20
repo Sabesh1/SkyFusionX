@@ -223,24 +223,22 @@ async def process_report_background(event_id: str, event_data: Any):
                 if image_bytes:
                     logger.info(f"Image decoded for {event_id}: {image_mime}, {len(image_bytes)} bytes")
 
-            # ── Phase 4: Gemini Evidence Analysis ─────────────────────────
+            # ── Phase 4: AI Analysis & TruthEngine ─────────────────────────
             gemini_res = None
-            if obs.is_mock:
-                logger.info(f"Skipping Gemini analysis for mock observation {event_id}.")
-            else:
-                import hashlib
-                img_hash = None
-                cached_obs = None
+            import hashlib
+            img_hash = None
+            cached_obs = None
+            
+            # ONLY use Gemini if there's an image (Multimodal On-Demand)
+            if image_bytes:
+                img_hash = hashlib.sha256(image_bytes).hexdigest()
+                obs.image_hash = img_hash
                 
-                if image_bytes:
-                    img_hash = hashlib.sha256(image_bytes).hexdigest()
-                    obs.image_hash = img_hash
-                    
-                    cached_obs = db.query(Observation).filter(
-                        Observation.image_hash == img_hash,
-                        Observation.image_analyzed_state == "ANALYZED",
-                        Observation.id != obs.id
-                    ).first()
+                cached_obs = db.query(Observation).filter(
+                    Observation.image_hash == img_hash,
+                    Observation.image_analyzed_state == "ANALYZED",
+                    Observation.id != obs.id
+                ).first()
                 
                 if cached_obs:
                     logger.info(f"Image {img_hash} already analyzed (cached from {cached_obs.id}). Reusing evidence.")
@@ -256,24 +254,23 @@ async def process_report_background(event_id: str, event_data: Any):
                         image_analyzed=True,
                         event_type=cached_obs.ml_event_type or obs.event_type or "OTHER",
                         confidence=cached_obs.ml_confidence or 0.8,
-                        trust_score=20.0, # Apply severe duplicate evidence penalty (e.g. 20 instead of 85+)
+                        trust_score=20.0,
                         verification_status=cached_obs.verification_assessment or "EVIDENCE_SUPPORTED",
                         supporting_evidence=cached_json.get("supporting", []),
                         contradicting_evidence=cached_json.get("contradicting", []),
                         evidence_assessment=cached_json.get("assessment", ""),
                         recommendation=cached_obs.verification_recommendation or "AUTO_ACCEPT",
-                        reason="Duplicate image detected — image has already been submitted in another report."
+                        reason="Duplicate image detected."
                     )
                     obs.image_analyzed_state = "ANALYZED"
                     obs.is_duplicate = True
                     obs.duplicate_of_id = cached_obs.id
                     obs.duplicate_similarity = 1.0
-                    obs.duplicate_reason = "Duplicate image detected — image has already been submitted in another report."
+                    obs.duplicate_reason = "Duplicate image detected."
                 else:
-                    if image_bytes:
-                        obs.image_analyzed_state = "ANALYZING"
-                        db.commit()
-                        
+                    obs.image_analyzed_state = "ANALYZING"
+                    db.commit()
+                    
                     from app.services.gemini_service import gemini_service
                     gemini_res = await gemini_service.analyze_report_with_evidence(
                         description=obs.content,
@@ -289,46 +286,20 @@ async def process_report_background(event_id: str, event_data: Any):
                         image_mime_type=image_mime,
                     )
                     
-                    if image_bytes:
-                        if gemini_res and gemini_res.image_analyzed:
-                            obs.image_analyzed_state = "ANALYZED"
-                        else:
-                            obs.image_analyzed_state = "ANALYSIS_FAILED"
+                    if gemini_res and gemini_res.image_analyzed:
+                        obs.image_analyzed_state = "ANALYZED"
+                    else:
+                        obs.image_analyzed_state = "ANALYSIS_FAILED"
 
             if gemini_res:
                 obs.gemini_analyzed = True
                 obs.image_analyzed = gemini_res.image_analyzed
-                
-                from app.intelligence.truth_engine import TruthEngine, TruthEvidence
-                engine = TruthEngine()
-                
-                source_score = TruthEngine.SOURCE_SCORES.get(obs.source, 50)
-                location_score = 95 if obs.location_confidence and obs.location_confidence > 0.5 else 10
-                timestamp_score = 90
-                weather_score = 75 if evidence.get("weather_context") else 40
-                nearby_score = 85 if evidence.get("nearby_observations") else 40
-                media_score = gemini_res.trust_score
-                historical_score = 70
-                
-                te_evidence = TruthEvidence(
-                    source=source_score,
-                    location=location_score,
-                    timestamp=timestamp_score,
-                    weather_data=weather_score,
-                    nearby_reports=nearby_score,
-                    media=media_score,
-                    historical=historical_score,
-                )
-                truth_score = engine.calculate(te_evidence)
-                
-                obs.trust_score = truth_score.overall
                 obs.ml_confidence = gemini_res.confidence
                 obs.ml_event_type = gemini_res.event_type
                 obs.verification_recommendation = gemini_res.recommendation
                 obs.verification_assessment = gemini_res.verification_status
                 obs.model_version = settings.GEMINI_MODEL
                 obs.ml_processed_at = datetime.datetime.utcnow()
-                # Store structured evidence for frontend display
                 obs.gemini_evidence_json = json.dumps({
                     "supporting": gemini_res.supporting_evidence,
                     "contradicting": gemini_res.contradicting_evidence,
@@ -337,32 +308,13 @@ async def process_report_background(event_id: str, event_data: Any):
                     "verification_status": gemini_res.verification_status,
                     "image_analyzed": gemini_res.image_analyzed,
                 })
-                logger.info(
-                    f"Gemini analysis stored for {event_id}: "
-                    f"event={gemini_res.event_type} trust={gemini_res.trust_score} "
-                    f"status={gemini_res.verification_status}"
-                )
+                logger.info(f"Gemini analysis stored for {event_id}.")
             else:
-                # Fallback — do NOT pretend Gemini ran
                 obs.gemini_analyzed = False
                 obs.image_analyzed = False
-                obs.trust_score = obs.trust_score or 40.0  # Keep existing or set conservative default
-                obs.ml_confidence = obs.ml_confidence or 0.4
-                obs.ml_event_type = obs.ml_event_type or obs.event_type or "OTHER"
-                obs.verification_recommendation = "REQUIRES_HUMAN_REVIEW"
-                obs.verification_assessment = "INSUFFICIENT_EVIDENCE"
-                obs.model_version = "fallback"
-                obs.gemini_evidence_json = json.dumps({
-                    "supporting": [],
-                    "contradicting": [],
-                    "assessment": "Gemini analysis was not available. Results are from fallback heuristics only.",
-                    "reason": "AI analysis unavailable — fallback used.",
-                    "verification_status": "INSUFFICIENT_EVIDENCE",
-                    "image_analyzed": False,
-                })
-                logger.warning(f"Gemini analysis failed for {event_id} — fallback applied.")
+                obs.model_version = "deterministic"
 
-            # ── Phase 5: Duplicate Detection ───────────────────────────────
+            # ── Phase 5: Duplicate Detection (moved before TruthEngine) ──────
             try:
                 from app.services.duplicate_detector import duplicate_detector
                 recent_time = obs.observed_at - datetime.timedelta(hours=2)
@@ -389,8 +341,90 @@ async def process_report_background(event_id: str, event_data: Any):
                 db.rollback()
                 logger.warning(f"Duplicate detection failed for {event_id}: {e}")
 
+            # ── Deterministic TruthEngine Processing ─────────────────────────
+            # Runs for ALL reports, ensuring core logic is never bypassed
+            from app.intelligence.truth_engine import TruthEngine, TruthEvidence
+            engine = TruthEngine()
+            
+            source_score = TruthEngine.SOURCE_SCORES.get(obs.source, 50)
+            location_score = 95 if obs.location_confidence and obs.location_confidence > 0.5 else 10
+            
+            # Genuine timestamp calculation
+            time_delta_seconds = abs((obs.ingested_at - obs.observed_at).total_seconds()) if obs.observed_at and obs.ingested_at else 0
+            if time_delta_seconds < 3600:
+                timestamp_score = 95
+            elif time_delta_seconds < 86400:
+                timestamp_score = 75
+            else:
+                timestamp_score = 40
+                
+            # Genuine weather correlation calculation
+            weather_score = 40
+            weather_ctx = evidence.get("weather_context")
+            if weather_ctx:
+                w_desc = (weather_ctx.get("description") or "").lower()
+                e_type = (obs.event_type or "").lower()
+                if e_type in w_desc:
+                    weather_score = 90
+                elif ("flood" in e_type and "rain" in w_desc) or \
+                     ("heat" in e_type and "clear" in w_desc) or \
+                     ("fog" in e_type and "fog" in w_desc) or \
+                     ("cyclone" in e_type and "wind" in w_desc) or \
+                     ("storm" in e_type and "rain" in w_desc):
+                    weather_score = 85
+                else:
+                    weather_score = 60
+                    
+            # Genuine nearby and historical calculations
+            nearby_count = len(evidence.get("nearby_observations", []))
+            nearby_score = 95 if nearby_count >= 3 else 80 if nearby_count > 0 else 40
+            
+            related_count = len(evidence.get("related_events", []))
+            historical_score = 90 if related_count >= 2 else 75 if related_count == 1 else 50
+            
+            # Incorporate Gemini's trust score if it ran, otherwise default to a neutral media score
+            media_score = gemini_res.trust_score if gemini_res else 50
+            
+            te_evidence = TruthEvidence(
+                source=source_score,
+                location=location_score,
+                timestamp=timestamp_score,
+                weather_data=weather_score,
+                nearby_reports=nearby_score,
+                media=media_score,
+                historical=historical_score,
+            )
+            truth_score = engine.calculate(te_evidence)
+            
+            obs.trust_score = truth_score.overall
+            
+            if obs.is_duplicate:
+                # Apply penalty for duplicates if not already handled by image hashing
+                obs.trust_score = min(obs.trust_score, 20.0)
+                obs.verification_assessment = "EVIDENCE_CONFLICTING"
+            elif not gemini_res:
+                obs.ml_confidence = 0.5
+                obs.ml_event_type = obs.event_type or "OTHER"
+                obs.verification_recommendation = "AUTO_ACCEPT" if truth_score.overall >= 70 else "REQUIRES_HUMAN_REVIEW"
+                
+                # Map TruthEngine status to assessment expected by Phase 6
+                if truth_score.status in ["HIGH_CONFIDENCE", "MEDIUM_HIGH_CONFIDENCE"]:
+                    obs.verification_assessment = "EVIDENCE_SUPPORTED"
+                else:
+                    obs.verification_assessment = "INSUFFICIENT_EVIDENCE"
+                    
+                obs.gemini_evidence_json = json.dumps({
+                    "supporting": [],
+                    "contradicting": [],
+                    "assessment": f"Deterministic TruthEngine scored {truth_score.overall}/100 based on calculated evidence metrics.",
+                    "reason": truth_score.status,
+                    "verification_status": obs.verification_assessment,
+                    "image_analyzed": False,
+                })
+                logger.info(f"TruthEngine processed {event_id} (Gemini bypassed). Score: {truth_score.overall}")
+
             # ── Phase 6: Finalize & Commit ─────────────────────────────────
-            # Derive verification_status from Gemini's assessment (or fallback)
+            # Derive verification_status from Gemini's assessment (or fallback/duplicate penalty)
             assessment = obs.verification_assessment
             if assessment == "EVIDENCE_SUPPORTED":
                 obs.verification_status = "VERIFIED"
@@ -434,6 +468,14 @@ async def process_report_background(event_id: str, event_data: Any):
                 "duplicate_of_id": obs.duplicate_of_id,
                 "duplicate_similarity": obs.duplicate_similarity,
             })
+
+            # ── Phase 8: Trigger Fusion & Alert Pipeline ───────────────────
+            try:
+                from stream.processor import trigger_clustering
+                logger.info(f"Triggering clustering/fusion pipeline for {event_id}...")
+                await trigger_clustering()
+            except Exception as e:
+                logger.error(f"Failed to trigger clustering/fusion: {e}")
 
         except Exception as e:
             logger.error(f"process_report_background fatal error for {event_id}: {e}", exc_info=True)

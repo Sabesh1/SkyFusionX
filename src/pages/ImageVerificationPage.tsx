@@ -17,7 +17,7 @@ export const ImageVerificationPage: React.FC = () => {
       {/* Header */}
       <Breadcrumbs
         title="Visual Evidence Verification Lab"
-        description="Multi-spectral computer vision, EXIF GPS header forensics, and satellite cloud-cover cross validation to verify disaster ground photographs and eliminate misinformation."
+        description="Gemini Multimodal Analysis and Truth Engine Contextual Fusion to verify disaster ground photographs and eliminate misinformation."
       />
 
       {/* Forensic Pipeline Visualizer */}
@@ -28,19 +28,19 @@ export const ImageVerificationPage: React.FC = () => {
             End-to-End Image Forensics Pipeline
           </h3>
           <span className="text-[10px] font-mono text-cyan-400 font-bold">
-            CV Model: YOLO-Disaster v8 + ForensicEXIF
+            Gemini Multimodal + TruthEngine
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center font-mono text-xs">
           {[
             { step: '1. Ingest', label: 'Ground Photo', color: 'text-theme-text' },
-            { step: '2. CV Detect', label: 'Object Mask', color: 'text-cyan-400' },
-            { step: '3. Hazard Check', label: 'Flood / Squall', color: 'text-blue-400' },
-            { step: '4. EXIF Match', label: 'GPS Coordinates', color: 'text-emerald-400' },
-            { step: '5. Time Delta', label: 'Capture Stamp', color: 'text-amber-400' },
-            { step: '6. Radar Cross', label: 'AWS Telemetry', color: 'text-purple-400' },
-            { step: '7. Output', label: 'Authenticity %', color: 'text-emerald-400 font-bold' },
+            { step: '2. Resolve', label: 'Location Mapping', color: 'text-cyan-400' },
+            { step: '3. Retrieve', label: 'Event Context', color: 'text-blue-400' },
+            { step: '4. Vision', label: 'Gemini Analysis', color: 'text-emerald-400' },
+            { step: '5. Dedupe', label: 'Duplicate Check', color: 'text-amber-400' },
+            { step: '6. Truth', label: 'TruthEngine Score', color: 'text-purple-400' },
+            { step: '7. Output', label: 'Final Verdict', color: 'text-emerald-400 font-bold' },
           ].map((item, idx) => (
             <div
               key={idx}

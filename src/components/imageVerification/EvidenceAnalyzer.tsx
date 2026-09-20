@@ -71,7 +71,7 @@ export const EvidenceAnalyzer: React.FC = () => {
 
         <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
           <Sparkles className="w-4 h-4" />
-          <span>AI Computer Vision Engine v4.8</span>
+          <span>Gemini Vision Integration</span>
         </div>
       </div>
 
@@ -87,34 +87,14 @@ export const EvidenceAnalyzer: React.FC = () => {
               className="w-full h-80 object-cover opacity-90 group-hover:opacity-100 transition-opacity"
             />
 
-            {/* Simulated Computer Vision Overlays */}
-            {result && !isAnalyzing && (
-              <>
-                {result.cvDetections.map((box, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      left: `${box.box[0]}%`,
-                      top: `${box.box[1]}%`,
-                      width: `${box.box[2]}%`,
-                      height: `${box.box[3]}%`,
-                    }}
-                    className="absolute border-2 border-cyan-400/80 bg-cyan-500/15 rounded pointer-events-none animate-fadeIn"
-                  >
-                    <span className="absolute -top-5 left-0 px-1.5 py-0.5 rounded bg-cyan-950 text-[10px] font-mono text-cyan-300 border border-cyan-500 font-bold whitespace-nowrap">
-                      {box.label} ({box.confidence}%)
-                    </span>
-                  </div>
-                ))}
-              </>
-            )}
+            {/* Simulated Computer Vision Overlays removed */}
 
             {/* Analysis Loading Overlay */}
             {isAnalyzing && (
               <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center text-cyan-400 space-y-2">
                 <span className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
                 <span className="text-xs font-mono font-bold tracking-wider">
-                  SCANNING EXIF HEADERS & CV DETECTIONS...
+                  ANALYZING EVIDENCE WITH GEMINI VISION...
                 </span>
               </div>
             )}
@@ -126,7 +106,7 @@ export const EvidenceAnalyzer: React.FC = () => {
                 {result?.fileName || 'image_raw.jpg'}
               </span>
               <span className="text-emerald-400 font-bold">
-                {result?.cvDetections.length || 0} Object Boundaries Identified
+                {result?.evidenceJson?.image_analyzed ? 'Visual Evidence Processed' : 'Image Analysis Bypassed/Failed'}
               </span>
             </div>
           </div>
@@ -167,35 +147,29 @@ export const EvidenceAnalyzer: React.FC = () => {
                 {/* Multi-Point Correlation Checks */}
                 <div className="space-y-2.5 text-xs font-mono">
                   <div className="flex justify-between items-center">
-                    <span className="text-theme-muted">CV Event Match ({result.detectedEvent}):</span>
+                    <span className="text-theme-muted">AI Event Match ({result.detectedEvent}):</span>
                     <span className="text-cyan-400 font-bold">{result.aiConfidence}%</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-theme-muted">EXIF GPS vs Claimed Zone:</span>
-                    <span className="text-emerald-400 font-bold">{result.locationMatch}%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-theme-muted">Timestamp Validity:</span>
-                    <span className="text-cyan-400 font-bold">{result.timestampMatch}%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-theme-muted">Weather Telemetry Correlation:</span>
-                    <span className="text-emerald-400 font-bold">{result.weatherCorrelation}%</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Hardware EXIF Metadata Card */}
-              <div className="p-4 rounded-xl bg-theme-surface/60 border border-theme-border space-y-2 text-xs font-mono">
-                <div className="text-[10px] uppercase font-bold text-theme-muted border-b border-theme-border pb-1.5 flex items-center gap-1.5">
-                  <FileCheck2 className="w-3.5 h-3.5 text-cyan-400" />
-                  Hardware Sensor & EXIF Headers
-                </div>
-                <div className="space-y-1.5 text-theme-text text-[11px]">
-                  <div>Device: <span className="text-theme-text">{result.exifDetails.cameraModel}</span></div>
-                  <div>GPS: <span className="text-cyan-400">{result.exifDetails.gpsCoordinates}</span></div>
-                  <div>Captured: <span className="text-theme-text">{result.exifDetails.captureTimestamp}</span></div>
-                  <div>Software: <span className="text-theme-muted">{result.exifDetails.softwareUsed}</span></div>
+                  {result.evidenceJson?.supporting?.length > 0 && (
+                    <div className="pt-2">
+                      <span className="text-emerald-400 font-bold">Supporting Evidence:</span>
+                      <ul className="list-disc pl-4 text-theme-muted mt-1 space-y-1">
+                        {result.evidenceJson.supporting.map((point: string, idx: number) => (
+                          <li key={idx}>{point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {result.evidenceJson?.contradicting?.length > 0 && (
+                    <div className="pt-2">
+                      <span className="text-amber-400 font-bold">Contradicting Evidence:</span>
+                      <ul className="list-disc pl-4 text-theme-muted mt-1 space-y-1">
+                        {result.evidenceJson.contradicting.map((point: string, idx: number) => (
+                          <li key={idx}>{point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </>

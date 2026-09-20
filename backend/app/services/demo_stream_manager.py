@@ -24,11 +24,10 @@ class DemoStreamManager:
             mocks = db.query(Observation).filter(Observation.is_mock == True).order_by(Observation.ingested_at.asc()).all()
             self.queue = [m.id for m in mocks if m.id not in self.streamed_ids]
             
-            # If all were streamed already, restart from beginning
+            # If all were streamed already, do not restart
             if not self.queue:
-                logger.info("Demo stream queue empty, restarting sequence...")
-                self.streamed_ids.clear()
-                self.queue = [m.id for m in mocks]
+                logger.info("Demo stream queue empty, sequence already completed.")
+                return
                 
             logger.info(f"DemoStreamManager starting with {len(self.queue)} reports queued.")
             self.is_running = True
@@ -55,38 +54,37 @@ class DemoStreamManager:
                 try:
                     obs = db.query(Observation).filter(Observation.id == obs_id).first()
                     if obs:
-                        # Broadcast the observation using the standard SSE format
-                        await push_to_clients({
-                            "type": "report_processed",
-                            "event_id": obs.id,
-                            "source": obs.source,
-                            "city": obs.city or obs.resolved_city or "Unknown",
-                            "state": obs.state or obs.resolved_state or "Unknown",
-                            "event_type": obs.event_type or "OTHER",
-                            "content": obs.content,
-                            "ml_event_type": obs.ml_event_type,
-                            "ml_confidence": obs.ml_confidence,
-                            "trust_score": obs.trust_score,
-                            "verification_recommendation": obs.verification_recommendation,
-                            "verification_assessment": obs.verification_assessment,
-                            "gemini_analyzed": obs.gemini_analyzed,
-                            "image_analyzed": obs.image_analyzed,
-                            "gemini_evidence_json": obs.gemini_evidence_json,
-                            "timestamp": obs.observed_at.isoformat() if obs.observed_at else None,
-                            "status": obs.verification_status,
-                            "severity": obs.severity,
-                            "model_version": obs.model_version,
-                            "media_url": obs.media_url,
-                            "resolved_city": obs.resolved_city,
-                            "resolved_state": obs.resolved_state,
-                            "resolved_latitude": obs.resolved_latitude,
-                            "resolved_longitude": obs.resolved_longitude,
-                            "location_confidence": obs.location_confidence,
-                            "is_duplicate": obs.is_duplicate,
-                            "duplicate_of_id": obs.duplicate_of_id,
-                            "duplicate_similarity": obs.duplicate_similarity,
-                        })
-                        logger.info(f"DemoStreamManager released report: {obs_id}")
+                        # Clone the mock observation so it enters the real ingestion pipeline
+                        import uuid
+                        import datetime
+                        
+                        new_id = f"DEMO-{uuid.uuid4().hex[:8].upper()}"
+                        new_obs = Observation(
+                            id=new_id,
+                            source=obs.source,
+                            source_event_id=f"DEMO-{uuid.uuid4().hex[:8].upper()}",
+                            observed_at=datetime.datetime.utcnow(),
+                            ingested_at=datetime.datetime.utcnow(),
+                            content=obs.content,
+                            latitude=obs.latitude,
+                            longitude=obs.longitude,
+                            city=obs.city,
+                            district=obs.district,
+                            state=obs.state,
+                            event_type=obs.event_type,
+                            severity=obs.severity,
+                            is_mock=False, # Treat as real data in the pipeline
+                            verification_status="PROCESSING",
+                            media_url=obs.media_url
+                        )
+                        db.add(new_obs)
+                        db.commit()
+                        
+                        # Trigger the REAL background pipeline
+                        from app.api.observations import process_report_background
+                        asyncio.create_task(process_report_background(new_id, None))
+                        
+                        logger.info(f"DemoStreamManager injected cloned report into pipeline: {new_id} (from {obs_id})")
                 finally:
                     db.close()
                 

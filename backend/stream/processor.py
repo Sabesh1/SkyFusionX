@@ -27,7 +27,7 @@ async def get_recent_observations(db, minutes: int = 30) -> List[Dict[str, Any]]
     cutoff = datetime.utcnow() - timedelta(minutes=minutes)
     result = db.query(Observation).filter(
         Observation.observed_at > cutoff,
-        Observation.verification_status.in_(["HIGH_CONFIDENCE", "MEDIUM_HIGH_CONFIDENCE"])
+        Observation.verification_status.in_(["HIGH_CONFIDENCE", "MEDIUM_HIGH_CONFIDENCE", "VERIFIED"])
     ).order_by(Observation.observed_at.desc()).all()
 
     return [
@@ -160,7 +160,33 @@ async def trigger_clustering():
 
 async def process_clustered(msg: Dict[str, Any]):
     """ Stage 7: PREDICT """
-    context = {"report_growth_rate": msg.get("report_count", 1) * 2.0}
+    lat = msg.get("latitude")
+    lon = msg.get("longitude")
+    
+    weather = {}
+    if lat is not None and lon is not None:
+        try:
+            from app.services.location_service import fetch_and_store_weather
+            db = SessionLocal()
+            location_mock = {
+                "lat": lat,
+                "lng": lon,
+                "location_id": f"CLUST-{abs(hash(f'{lat}_{lon}')) % 100000}"
+            }
+            res = fetch_and_store_weather(location_mock, db)
+            if res:
+                weather = res
+            db.close()
+        except Exception as e:
+            logger.error(f"Failed to fetch cluster weather: {e}")
+
+    context = {
+        "report_growth_rate": msg.get("report_count", 1) * 2.0,
+        "rainfall_1h": weather.get("rainfall_mm", 0.0),
+        "wind_speed": weather.get("wind_speed_kmh", 0.0),
+        "temperature": weather.get("temperature_c", 25.0),
+        "historical_risk": 50.0
+    }
     prob = PredictionEngine.predict(msg, context)
     
     predicted = msg.copy()
@@ -170,7 +196,14 @@ async def process_clustered(msg: Dict[str, Any]):
 
 async def process_predicted(msg: Dict[str, Any]):
     """ Stage 8: RISK """
-    context = {"population_density": 1000}
+    lat = msg.get("latitude", 20.0)
+    lon = msg.get("longitude", 80.0)
+    
+    # Deterministic population density based on coordinates for prototype (between 100 and 15000)
+    # In production, this would query a census/demographics API.
+    mock_pop_density = 100 + (abs(hash(f"pop_{lat:.1f}_{lon:.1f}")) % 14900)
+    
+    context = {"population_density": mock_pop_density}
     risk_res = RiskEngine.calculate_risk(msg, context)
     
     risk_event = msg.copy()

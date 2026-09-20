@@ -46,7 +46,7 @@ class FusionEngine:
         fused_confidence = base_confidence + source_bonus + verification_bonus
         
         return {
-            "fused_confidence": max(0.0, min(100.0, round(fused_confidence, 1))),
+            "evidence_confidence": max(0.0, min(100.0, round(fused_confidence, 1))),
             "report_count": report_count,
             "verified_report_count": verified_count,
             "source_count": source_count
