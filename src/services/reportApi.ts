@@ -44,6 +44,8 @@ export const reportApi = {
           ? (br.severity >= 4 ? 'CRITICAL' : br.severity === 3 ? 'HIGH' : 'MODERATE') 
           : 'MODERATE',
         timestamp: br.observed_at,
+        isMock: br.is_mock,
+        sourceType: br.source_type,
         evidence: br.media_url ? [{ type: 'image' as const, url: br.media_url, capturedAt: br.observed_at, hasExifData: false }] : [],
         verificationFactors: {
           sourceCredibility: Math.round(br.trust_score * 0.9) || 80,
@@ -56,15 +58,24 @@ export const reportApi = {
         },
         aiExplanation: br.verification_assessment || `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
         aiStatus: (() => {
-          if (br.verification_status === 'VERIFIED') return 'AI VERIFIED';
+          // Source-appropriate AI status — don't claim AI verified what AI didn't verify
+          if (br.gemini_analyzed === true || br.model_version?.includes('gemini')) return 'GEMINI ANALYZED';
+          if (br.model_version === 'v1' || br.model_version?.includes('v1')) return 'ML ANALYZED';
+          // Source-semantic statuses when no AI processing occurred
+          const mv = br.model_version || '';
+          if (mv === 'telemetry') return 'TELEMETRY OBSERVATION';
+          if (mv === 'official_bulletin') return 'OFFICIAL BULLETIN';
+          if (mv === 'remote_sensing') return 'REMOTE SENSING';
+          // Verification-based statuses for citizen/social/news
+          if (br.verification_status === 'VERIFIED') return 'VERIFIED';
           if (br.verification_status === 'REJECTED') return 'AI FLAGGED';
           if (br.verification_status === 'UNDER_REVIEW') return 'HUMAN REVIEW REQUIRED';
           if (br.verification_status === 'PROCESSING') return 'PROCESSING';
-          if (br.gemini_analyzed === true) return 'GEMINI ANALYZED';
-          if (br.model_version?.includes('gemini')) return 'GEMINI ANALYZED';
-          if (br.model_version === 'v1' || br.model_version?.includes('v1')) return 'ML ANALYZED';
-          if (br.model_version === 'fallback' || br.model_version === 'none') return 'FALLBACK';
-          return 'PROCESSING';
+          // Fallback based on source type
+          const st = (br.source_type || '').toLowerCase();
+          if (st === 'citizen' || st === 'social_media') return 'AWAITING ANALYSIS';
+          if (st === 'web') return 'CONTENT EXTRACTED';
+          return 'INGESTED';
         })(),
         modelVersion: br.model_version,
         mlEventType: br.ml_event_type,
@@ -128,6 +139,8 @@ export const reportApi = {
           ? (br.severity >= 4 ? 'CRITICAL' : br.severity === 3 ? 'HIGH' : 'MODERATE') 
           : 'MODERATE',
         timestamp: br.observed_at,
+        isMock: br.is_mock,
+        sourceType: br.source_type,
         evidence: br.media_url ? [{ type: 'image' as const, url: br.media_url, capturedAt: br.observed_at, hasExifData: false }] : [],
         verificationFactors: {
           sourceCredibility: Math.round(br.trust_score * 0.9) || 80,
@@ -140,12 +153,20 @@ export const reportApi = {
         },
         aiExplanation: br.verification_assessment || `Report ingested from ${br.source}. AI Recommendation: ${br.verification_recommendation || 'N/A'}.`,
         aiStatus: (() => {
-          if (br.verification_status === 'VERIFIED') return 'AI VERIFIED';
+          if (br.gemini_analyzed === true || br.model_version?.includes('gemini')) return 'GEMINI ANALYZED';
+          if (br.model_version === 'v1' || br.model_version?.includes('v1')) return 'ML ANALYZED';
+          const mv = br.model_version || '';
+          if (mv === 'telemetry') return 'TELEMETRY OBSERVATION';
+          if (mv === 'official_bulletin') return 'OFFICIAL BULLETIN';
+          if (mv === 'remote_sensing') return 'REMOTE SENSING';
+          if (br.verification_status === 'VERIFIED') return 'VERIFIED';
           if (br.verification_status === 'REJECTED') return 'AI FLAGGED';
           if (br.verification_status === 'UNDER_REVIEW') return 'HUMAN REVIEW REQUIRED';
           if (br.verification_status === 'PROCESSING') return 'PROCESSING';
-          if (br.gemini_analyzed) return 'GEMINI ANALYZED';
-          return 'FALLBACK';
+          const st = (br.source_type || '').toLowerCase();
+          if (st === 'citizen' || st === 'social_media') return 'AWAITING ANALYSIS';
+          if (st === 'web') return 'CONTENT EXTRACTED';
+          return 'INGESTED';
         })(),
         modelVersion: br.model_version,
         mlEventType: br.ml_event_type,

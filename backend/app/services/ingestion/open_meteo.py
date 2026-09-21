@@ -14,13 +14,7 @@ CONFIGURED_CITIES = [
     "Chennai",
     "Mumbai",
     "Delhi",
-    "Bengaluru",
-    "Hyderabad",
-    "Kolkata",
-    "Pune",
-    "Ahmedabad",
-    "Surat",
-    "Jaipur"
+    "Bengaluru"
 ]
 
 class OpenMeteoAdapter(BaseIngestionAdapter):
@@ -65,7 +59,41 @@ class OpenMeteoAdapter(BaseIngestionAdapter):
             db.close()
             
         return raw_results
-
+    async def fetch_single(self, city: str) -> Dict[str, Any]:
+        """Fetch weather data for a single city, used by DemoStreamManager to save API calls."""
+        db = SessionLocal()
+        try:
+            loc = resolve_location(city, db)
+            if not loc:
+                logger.warning(f"[OpenMeteo] Could not resolve location for {city}")
+                return None
+            
+            lat, lng = loc["lat"], loc["lng"]
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(settings.OPEN_METEO_WEATHER_URL, params={
+                    "latitude": lat,
+                    "longitude": lng,
+                    "current": [
+                        "temperature_2m",
+                        "apparent_temperature",
+                        "rain",
+                        "relative_humidity_2m",
+                        "wind_speed_10m",
+                        "wind_direction_10m",
+                        "weather_code",
+                        "is_day",
+                    ],
+                    "timezone": "Asia/Kolkata",
+                })
+                resp.raise_for_status()
+                data = resp.json()
+                data["_location_ctx"] = loc
+                return data
+        except Exception as e:
+            logger.error(f"[OpenMeteo] Fetch single failed for {city}: {e}")
+            return None
+        finally:
+            db.close()
     def normalize(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
         loc = raw_data.get("_location_ctx")
         current = raw_data.get("current", {})
@@ -103,7 +131,7 @@ class OpenMeteoAdapter(BaseIngestionAdapter):
 
         return {
             "source": "Open-Meteo",
-            "source_type": "api",
+            "source_type": "weather_api",
             "source_url": settings.OPEN_METEO_WEATHER_URL,
             "source_event_id": source_event_id,
             "observed_at": observed_at,
@@ -114,7 +142,8 @@ class OpenMeteoAdapter(BaseIngestionAdapter):
             "state": loc["state"],
             "event_type": event_type,
             "severity": severity,
-            "verification_status": "VERIFIED", # System API is trusted
+            "verification_status": "VERIFIED",  # System API is trusted
             "trust_score": float(90 + severity + (loc["lat"] % 5)),
+            "model_version": "telemetry",
             "raw_payload": raw_data
         }
