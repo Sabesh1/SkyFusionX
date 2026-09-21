@@ -1,6 +1,6 @@
 // Centralized API Client bridging frontend services to FastAPI backend
 
-export const API_BASE_URL = '';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 class ApiClient {
   private isBackendOnline: boolean = false;
