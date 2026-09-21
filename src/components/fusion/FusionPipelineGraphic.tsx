@@ -13,12 +13,8 @@ import {
 
 export const FusionPipelineGraphic: React.FC = () => {
   const sources = [
-    { name: 'INSAT-3D Satellite', icon: Satellite, color: 'text-blue-400', stat: 'Cloud Temp -74°C' },
-    { name: '1,284 AWS Stations', icon: Radio, color: 'text-emerald-400', stat: '62.4mm/hr Rain' },
-    { name: 'Doppler Radar', icon: CloudLightning, color: 'text-purple-400', stat: '54 dBZ Reflectivity' },
-    { name: 'Citizen Reports', icon: Users, color: 'text-cyan-400', stat: '423 Ground Pings' },
-    { name: 'NWP Weather APIs', icon: Database, color: 'text-amber-400', stat: 'IMD + ECMWF 94%' },
-    { name: 'Social NLP Signals', icon: Zap, color: 'text-pink-400', stat: 'Filtered Geo-Tags' },
+    { name: 'Citizen Reports', icon: Users, color: 'text-cyan-400', stat: 'Ground Pings' },
+    { name: 'AI TruthEngine', icon: Zap, color: 'text-pink-400', stat: 'Evidence Verification' },
   ];
 
   return (
@@ -30,7 +26,7 @@ export const FusionPipelineGraphic: React.FC = () => {
             Live Multi-Modal Sensor Fusion Pipeline
           </h3>
           <p className="text-xs text-theme-muted mt-0.5">
-            Real-time ingestion and normalization across 6 diverse telemetry streams.
+            Real-time ingestion and normalization across active telemetry streams.
           </p>
         </div>
         <span className="px-2.5 py-1 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/60 font-mono text-xs font-bold">
@@ -40,12 +36,12 @@ export const FusionPipelineGraphic: React.FC = () => {
 
       {/* Visual Pipeline Flow */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-        {/* Step 1: 6 Ingestion Streams */}
+        {/* Step 1: Active Ingestion Streams */}
         <div className="space-y-2">
           <div className="text-[10px] font-mono uppercase tracking-widest text-theme-muted font-bold px-1">
             1. Raw Telemetry Ingest
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2">
             {sources.map(src => (
               <div
                 key={src.name}
@@ -93,7 +89,7 @@ export const FusionPipelineGraphic: React.FC = () => {
           <div className="space-y-1">
             <span className="text-[10px] font-mono uppercase text-emerald-400 font-bold">4. Actionable Incident</span>
             <h4 className="text-xs font-bold text-theme-text">Verified Weather Event</h4>
-            <p className="text-[10px] font-mono text-emerald-300">93% Fusion Confidence</p>
+            <p className="text-[10px] font-mono text-emerald-300">High Confidence Match</p>
           </div>
         </div>
       </div>

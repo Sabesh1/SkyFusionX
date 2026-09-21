@@ -13,20 +13,17 @@ export const fusionApi = {
       const backendEvent = await eventApi.getEventDetails(eventId);
       if (backendEvent) {
         // Build a fusion breakdown from real backend data
-        const citizenCount = backendEvent.totalReports || 1;
+        const citizenCount = backendEvent.totalReports || 0;
         
         return {
           eventId,
           eventName: backendEvent.title || backendEvent.eventName,
           location: backendEvent.location || 'National Surveillance Grid',
           citizenReportCount: citizenCount,
-          weatherStationCount: Math.max(1, Math.floor(citizenCount / 10)),
-          satelliteCorrelationPct: Math.round(backendEvent.trustScore * 0.9) || 82,
-          radarCorrelationPct: Math.round(backendEvent.trustScore * 0.95) || 80,
-          apiCorrelationPct: 85,
-          socialSignalsScorePct: 78,
-          overallFusionConfidence: backendEvent.fusionConfidence || Math.round((backendEvent.trustScore + 85) / 2),
-          fusionVerdict: backendEvent.summary || 'Standard multi-source data convergence.',
+          verifiedReportCount: backendEvent.verifiedReports || 0,
+          evidenceConfidence: backendEvent.trustScore || 0,
+          overallFusionConfidence: backendEvent.trustScore || 0,
+          fusionVerdict: backendEvent.summary || 'Data analysis complete.',
           lastCalculated: 'Just now',
         };
       }
@@ -39,11 +36,8 @@ export const fusionApi = {
       eventName: 'Active Weather Event',
       location: 'National Surveillance Grid',
       citizenReportCount: 0,
-      weatherStationCount: 0,
-      satelliteCorrelationPct: 0,
-      radarCorrelationPct: 0,
-      apiCorrelationPct: 0,
-      socialSignalsScorePct: 0,
+      verifiedReportCount: 0,
+      evidenceConfidence: 0,
       overallFusionConfidence: 0,
       fusionVerdict: 'Insufficient data for multi-source convergence.',
       lastCalculated: 'Unknown',

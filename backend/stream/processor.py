@@ -144,10 +144,30 @@ async def trigger_clustering():
     events = ClusteringEngine.cluster(recent_obs)
 
     for event in events:
+        # Fetch weather for the cluster centroid to use in fusion
+        weather_context = None
+        db_weather = SessionLocal()
+        try:
+            from app.services.location_service import fetch_and_store_weather
+            location_mock = {
+                "lat": event["latitude"],
+                "lng": event["longitude"],
+                "location_id": f"CLUST-{abs(hash(str(event.get('latitude', 0)) + '_' + str(event.get('longitude', 0)))) % 100000}"
+            }
+            res = fetch_and_store_weather(location_mock, db_weather)
+            if res:
+                weather_context = res
+        except Exception as e:
+            logger.error(f"Failed to fetch cluster weather for fusion: {e}")
+        finally:
+            db_weather.close()
+
         # Fuse observations in this cluster
-        fusion_result = FusionEngine.fuse(event["observations"])
+        fusion_result = FusionEngine.fuse(event["observations"], weather_context)
 
         event.update(fusion_result)
+        # Pass weather context downstream to avoid re-fetching in PREDICT
+        event["weather_context"] = weather_context
 
         # We need an event ID that is stable for the same geographic area
         # For prototype, we generate one deterministically based on cluster lat/lon roughly
@@ -163,8 +183,8 @@ async def process_clustered(msg: Dict[str, Any]):
     lat = msg.get("latitude")
     lon = msg.get("longitude")
     
-    weather = {}
-    if lat is not None and lon is not None:
+    weather = msg.get("weather_context", {})
+    if not weather and lat is not None and lon is not None:
         try:
             from app.services.location_service import fetch_and_store_weather
             db = SessionLocal()
@@ -226,7 +246,15 @@ async def process_predicted(msg: Dict[str, Any]):
         evt.longitude = risk_event.get("longitude")
         evt.report_count = risk_event.get("report_count")
         evt.verified_report_count = risk_event.get("verified_report_count")
-        evt.evidence_confidence = risk_event.get("evidence_confidence")
+        # Ensure we write evidence_confidence mapped to fusion_confidence for legacy, and actual fusion_confidence
+        evt.evidence_confidence = risk_event.get("evidence_confidence", risk_event.get("fusion_confidence", 0.0))
+        evt.fusion_confidence = risk_event.get("fusion_confidence")
+        evt.weather_support_flag = risk_event.get("weather_support_flag")
+        evt.contradiction_flag = risk_event.get("contradiction_flag")
+        
+        import json
+        evt.supporting_factors = json.dumps(risk_event.get("supporting_factors", []))
+        
         evt.prediction_probability = risk_event.get("prediction_probability")
         evt.exposure_score = risk_event.get("exposure_score")
         evt.risk_score = risk_event.get("risk_score")

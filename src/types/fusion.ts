@@ -16,11 +16,8 @@ export interface EventFusionBreakdown {
   eventName: string;
   location: string;
   citizenReportCount: number;
-  weatherStationCount: number;
-  satelliteCorrelationPct: number;
-  radarCorrelationPct: number;
-  apiCorrelationPct: number;
-  socialSignalsScorePct: number;
+  verifiedReportCount: number;
+  evidenceConfidence: number;
   overallFusionConfidence: number;
   fusionVerdict: string;
   lastCalculated: string;

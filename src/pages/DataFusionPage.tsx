@@ -102,37 +102,19 @@ export const DataFusionPage: React.FC = () => {
               <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
                 <span className="text-[10px] text-theme-muted uppercase">Citizen Reports</span>
                 <div className="text-lg font-bold text-theme-text">{fusionBreakdown.citizenReportCount} Ground Pings</div>
-                <div className="text-[10px] text-cyan-400">100% Geo-Triangulated</div>
+                <div className="text-[10px] text-cyan-400">Geo-Triangulated</div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
-                <span className="text-[10px] text-theme-muted uppercase">Weather Stations</span>
-                <div className="text-lg font-bold text-emerald-400">{fusionBreakdown.weatherStationCount} Active AWS</div>
-                <div className="text-[10px] text-theme-muted">Rain &gt; 50mm/hr</div>
+                <span className="text-[10px] text-theme-muted uppercase">Verified Reports</span>
+                <div className="text-lg font-bold text-emerald-400">{fusionBreakdown.verifiedReportCount} Confirmed</div>
+                <div className="text-[10px] text-theme-muted">Multi-modal confirmation</div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
-                <span className="text-[10px] text-theme-muted uppercase">Satellite Match</span>
-                <div className="text-lg font-bold text-blue-400">{fusionBreakdown.satelliteCorrelationPct}%</div>
-                <div className="text-[10px] text-theme-muted">INSAT-3D Infrared</div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
-                <span className="text-[10px] text-theme-muted uppercase">Doppler Radar</span>
-                <div className="text-lg font-bold text-purple-400">{fusionBreakdown.radarCorrelationPct}%</div>
-                <div className="text-[10px] text-theme-muted">54 dBZ Core Reflectivity</div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
-                <span className="text-[10px] text-theme-muted uppercase">Weather APIs</span>
-                <div className="text-lg font-bold text-amber-400">{fusionBreakdown.apiCorrelationPct}%</div>
-                <div className="text-[10px] text-theme-muted">IMD NWP Models</div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-theme-surface/60 border border-theme-border space-y-1">
-                <span className="text-[10px] text-theme-muted uppercase">Social Signals</span>
-                <div className="text-lg font-bold text-pink-400">{fusionBreakdown.socialSignalsScorePct}%</div>
-                <div className="text-[10px] text-theme-muted">NLP Keyword Surges</div>
+                <span className="text-[10px] text-theme-muted uppercase">AI Evidence Match</span>
+                <div className="text-lg font-bold text-blue-400">{fusionBreakdown.evidenceConfidence}%</div>
+                <div className="text-[10px] text-theme-muted">TruthEngine Model</div>
               </div>
             </div>
           </div>
@@ -144,10 +126,10 @@ export const DataFusionPage: React.FC = () => {
         </div>
       )}
 
-      {/* 6 Real-Time Data Source Health Cards */}
+      {/* Real-Time Data Source Health Cards */}
       <div className="space-y-4">
         <h3 className="text-xs font-mono uppercase font-bold tracking-wider text-theme-muted">
-          6 Live Telemetry Pipelines (Status & Diagnostics)
+          Active Telemetry Pipelines (Status & Diagnostics)
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sources.map(source => (
