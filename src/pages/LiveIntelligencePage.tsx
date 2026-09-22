@@ -35,7 +35,7 @@ export const LiveIntelligencePage: React.FC = () => {
   const [aiStatus, setAiStatus] = useState<'Online' | 'Unavailable'>('Unavailable');
   const [isProcessingActive, setIsProcessingActive] = useState(false);
   const [processingCount, setProcessingCount] = useState(0);
-  const processingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const processingIntervalRef = ReturnType<typeof setTimeout>;
   const { liveReports } = useDemoMode();
   const { setSelectedReport, addToast } = useApp();
 
