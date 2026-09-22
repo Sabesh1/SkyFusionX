@@ -6,6 +6,7 @@ sqlalchemy
 psycopg2-binary
 geoalchemy2
 alembic
+bcrypt
 httpx
 numpy
 scikit-learn
